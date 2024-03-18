@@ -9,5 +9,5 @@ import { RouterOutlet } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  title = 'Simplex con jefry y ariana xd';
+  title = 'Simplex con jefry y ariana';
 }
