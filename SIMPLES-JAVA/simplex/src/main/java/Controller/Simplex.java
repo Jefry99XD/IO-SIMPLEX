@@ -4,13 +4,13 @@
  */
 package Controller;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author jeffr
  */
 public class Simplex {
-<<<<<<< Updated upstream
-=======
     //guarda las iteraciones
     private ArrayList<float[][]> iteraciones = new ArrayList<>();
     //para devolver el saliente, pa la interfaz
@@ -125,6 +125,5 @@ public void imprimirTabla(float[][] tabla) {
 //Los radios los va poniendo en el ultimo elemento de la fila, puede modificar la ultima iteracion o crear una tabla para devolverla
 //puede colocar el infinito como un -1 en la tabla
     }
->>>>>>> Stashed changes
     
 }
