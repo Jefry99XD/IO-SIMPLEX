@@ -20,6 +20,7 @@ public class Main {
         float[][] restricciones = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
 
         Simplex simplex = new Simplex(z, restricciones);
+        System.out.println(simplex.masNegativo());
         
     }
     
