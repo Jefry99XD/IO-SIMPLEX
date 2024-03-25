@@ -21,6 +21,11 @@ public class Main {
 
         Simplex simplex = new Simplex(z, restricciones);
         
+        simplex.CalcularRadios(simplex.masNegativo());
+        float pivote = simplex.getPivote(simplex.masNegativo());
+       // int pivote = simplex.getPivote(simplex.masNegativo());
+        //System.out.println("El pivote es: " + pivote);
+        
     }
     
 }
