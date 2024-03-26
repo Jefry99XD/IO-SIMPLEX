@@ -23,8 +23,15 @@ public class Main {
         
         simplex.CalcularRadios(simplex.masNegativo());
         float pivote = simplex.getPivote(simplex.masNegativo());
-       // int pivote = simplex.getPivote(simplex.masNegativo());
-        //System.out.println("El pivote es: " + pivote);
+
+        simplex.operacionesPivote(simplex.masNegativo());
+        float[][] tablaResultado = simplex.getIteraciones().get(simplex.getIteraciones().size() - 1);
+        
+        System.out.println("");
+        System.out.println("Tabla después de una iteración:");
+        System.out.println("");
+        
+        simplex.imprimirTabla(tablaResultado);
         
     }
     

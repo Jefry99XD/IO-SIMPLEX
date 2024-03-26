@@ -63,6 +63,9 @@ public class Simplex {
         }
     }
     
+    //-----------------------------------------
+    //-----------------------------------------
+    
     public Simplex(float[] zeta, float[][] restricciones) {
         //Llamado a la funcion 
         convertirOpuestosZ(zeta);
@@ -93,20 +96,86 @@ public class Simplex {
         //guarda la tabla 0 en las iteraciones
         iteraciones.add(tablaInicial);
     }
-
+    
+    //-----------------------------------------
+    //-----------------------------------------
 
     public void imprimirTabla(float[][] tabla) {
         for (float[] tabla1 : tabla) {
             for (int j = 0; j < tabla1.length; j++) {
-                System.out.print(tabla1[j] + "    ");
+                System.out.print(tabla1[j] + "         ");
             }
             System.out.println();
         }
     }
+    
+    //-----------------------------------------
+    //-----------------------------------------
+    
+    public void imprimirTablaActual() {
+        float[][] tabla = iteraciones.get(iteraciones.size() - 1);
+        for (float[] fila : tabla) {
+            for (float valor : fila) {
+                // Convertir el valor a cadena y ajustar el ancho del campo para agregar espacios adicionales
+                System.out.printf("              ");
+            }
+            System.out.println(); // Nueva línea para cada fila
+        }
+    }
+    
+    //-----------------------------------------
+    //-----------------------------------------
 
     public void iteracion(){
-        //aqui va todo el proceso de la iteracion
+        int indiceMasNegativo = masNegativo();
+        float pivote = getPivote(indiceMasNegativo);
+        operacionesPivote(indiceMasNegativo);
+        
     }
+    
+    //-----------------------------------------
+    //-----------------------------------------
+    
+    public void operacionesPivote(int indiceMasNegativo){
+        float[][] tabla = iteraciones.get(iteraciones.size() - 1 );
+        float pivote = getPivote(indiceMasNegativo);
+        
+        int filaPivote = -1;
+        float menorValorRadio = Float.MAX_VALUE;
+        
+        for(int i = 1; i < tabla.length; i++){
+            float valorActual = tabla[i][tabla[i].length - 1];
+            if(tabla[i][indiceMasNegativo] > 0 && valorActual / tabla[i][indiceMasNegativo] < menorValorRadio){
+                menorValorRadio = valorActual / tabla[i][indiceMasNegativo];
+                filaPivote = i;
+            }
+        }
+        if(filaPivote == -1){
+            return;
+        }
+        
+        for (int j = 0; j < tabla[filaPivote].length; j++) {
+            tabla[filaPivote][j] /= pivote;
+        }
+
+        // Para cada otra fila en la tabla
+        for (int i = 0; i < tabla.length; i++) {
+            if (i != filaPivote) { // No necesitamos operar en la fila del pivote
+                float factor = -tabla[i][indiceMasNegativo]; // Factor para hacer cero el elemento en la columna del pivote
+                for (int j = 0; j < tabla[i].length; j++) {
+                    tabla[i][j] += factor * tabla[filaPivote][j]; // Sumar la fila del pivote multiplicada por el factor
+                }
+            }
+        }
+        
+        iteraciones.add(tabla);
+        //imprimirTablaActual();
+    }
+    
+    
+    
+    //-----------------------------------------
+    //-----------------------------------------
 
     public int masNegativo(){
     //funcion que retorna el INDICE del z mas negativo, si quiere que devuelva el elemento cambielo a float
@@ -125,55 +194,43 @@ public class Simplex {
     //-----------------------------------------
     //-----------------------------------------
 
-        public float getPivote(int indiceMasNegativo) {
-        float[][] actual = iteraciones.get(iteraciones.size() - 1); // Obtener la última iteración
-        float menorValorZ = Float.MAX_VALUE;                        // Inicializar el menor valor de Z como el máximo posible
-        float menorValorRadio = Float.MAX_VALUE;                    // Inicializar el menor valor de la columna de los radios
-        float pivote = 0; 
-
-        // Encontrar el valor más negativo en Z
-        for (int i = 0; i < actual.length; i++) {
-            if (actual[i][indiceMasNegativo] < menorValorZ) {
-                menorValorZ = actual[i][indiceMasNegativo];
-            }
-        }
-
-        // Buscar el menor valor en la columna de los radios
-        for (int i = 1; i < actual.length; i++) {
-            float valorActual = actual[i][actual[i].length - 1];
-            if (valorActual < menorValorRadio) {
-                menorValorRadio = valorActual;
-            }
-        }
-            
-        System.out.println("Valor más negativo en Z: " + menorValorZ);
-        System.out.println("Valor más pequeño en radio: " + menorValorRadio);
-
-        // Encontrar el pivote
-        for (int i = 1; i < actual.length; i++) {
-            if (actual[i][indiceMasNegativo] == menorValorZ) { // Buscar en la fila de Z
-                for (int j = 1; j < actual[i].length - 1; j++) {
-                    if (actual[i][j] == menorValorRadio) { // Buscar en la columna de los radios
-                        pivote = actual[i][j];
-                        //System.out.println("Pivote: " + pivote);
-                        return pivote; 
-                    }
+    public float getPivote(int indiceMasNegativo) {
+            float[][] actual = iteraciones.get(iteraciones.size() - 1); // Obtener la última iteración
+            float menorValorZ = Float.MAX_VALUE;                        // Inicializar el menor valor de Z como el máximo posible
+            float menorValorRadio = Float.MAX_VALUE;                    // Inicializar el menor valor de la columna de los radios
+            int menorRadioIndice = 0;
+            float pivote = 0; 
+            // Encontrar el valor más negativo en Z
+            for (int i = 0; i < actual.length; i++) {
+                if (actual[i][indiceMasNegativo] < menorValorZ) {
+                    menorValorZ = actual[i][indiceMasNegativo];
                 }
             }
+            // Buscar el menor valor en la columna de los radios
+            for (int i = 1; i < actual.length; i++) {
+                float valorActual = actual[i][actual[i].length - 1];
+                if (valorActual < menorValorRadio) {
+                    menorValorRadio = valorActual;
+                    menorRadioIndice = i;
+                }
+            }
+            //System.out.println("Valor más negativo en Z: " + menorValorZ);
+            //System.out.println("Valor más pequeño en radio: " + menorValorRadio);
+            // Encontrar el pivote
+            pivote = actual[menorRadioIndice][indiceMasNegativo];
+            //System.out.println("Pivote: " + pivote);
+            // Devolver el valor del pivote
+            return pivote;
         }
-        System.out.println("Pivote: " + pivote);
-        // Devolver el valor del pivote
-        return pivote;
-    }
 
-    //--------------------------------------------
-    //--------------------------------------------
+    //-----------------------------------------
+    //-----------------------------------------
     public void CalcularRadios(int indiceMasNegativo) {
         float[][] ultimaIteracion = iteraciones.get(iteraciones.size() - 1);
 
         // Imprimir valor más negativo
         System.out.println("");
-        System.out.println("Valor más negativo: " + ultimaIteracion[0][indiceMasNegativo]);
+        //System.out.println("Valor más negativo: " + ultimaIteracion[0][indiceMasNegativo]);
         System.out.println("");
         
         for (int i = 1; i < ultimaIteracion.length; i++) {
