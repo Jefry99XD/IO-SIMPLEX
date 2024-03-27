@@ -21,6 +21,18 @@ public class Main {
 
         Simplex simplex = new Simplex(z, restricciones);
         
+        simplex.CalcularRadios(simplex.masNegativo());
+        float pivote = simplex.getPivote(simplex.masNegativo());
+
+        simplex.operacionesPivote(simplex.masNegativo());
+        float[][] tablaResultado = simplex.getIteraciones().get(simplex.getIteraciones().size() - 1);
+        
+        System.out.println("");
+        System.out.println("Tabla después de una iteración:");
+        System.out.println("");
+        
+        simplex.imprimirTabla(tablaResultado);
+        
     }
     
 }

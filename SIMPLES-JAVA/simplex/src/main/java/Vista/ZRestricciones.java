@@ -3,6 +3,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package Vista;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  *
@@ -13,10 +15,53 @@ public class ZRestricciones extends javax.swing.JFrame {
     /**
      * Creates new form Entrada
      */
-    public ZRestricciones() {
+    public ZRestricciones(int r,int v) {
+        this.restricciones = r;
+        this.variables = v;
+        
         initComponents();
+        for (int i = 0; i < v; i++) {
+        jPanel5ZETA.add(new JTextField(5));
+        jPanel5ZETA.add(new JLabel("x"+(i+1)));
+        }
+        jPanel5ZETA.setLayout(new FlowLayout());
+        jPanel5res.setLayout(new GridLayout(r + 2, 1, 0, 10)); 
+        String[] conditions = new String[]{"≤", "≥", "="};
+        jPanel5res.add(new JSeparator(SwingConstants.HORIZONTAL));
+        for (int i = 0; i < r; i++) {
+            JPanel rowPanel = new JPanel(new GridLayout(1, v + 1));
+            for (int j = 0; j < v; j++) {
+                rowPanel.add(new JTextField(5));
+                rowPanel.add(new JLabel("x"+(i+1)));
+            }
+            rowPanel.add(new JComboBox(conditions));
+            rowPanel.add(new JTextField(5)); 
+            jPanel5res.add(new JPanel());
+            jPanel5res.add(rowPanel); 
+        }
+        
+    }
+    
+    private int restricciones;
+    private int variables;
+
+    public int getRestricciones() {
+        return restricciones;
     }
 
+    public void setRestricciones(int restricciones) {
+        this.restricciones = restricciones;
+    }
+
+    public int getVariables() {
+        return variables;
+    }
+
+    public void setVariables(int variables) {
+        this.variables = variables;
+    }
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -28,21 +73,117 @@ public class ZRestricciones extends javax.swing.JFrame {
 
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        jPanel5ZETA = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jPanel5res = new javax.swing.JPanel();
+        jLabel3 = new javax.swing.JLabel();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 204, 204));
 
         jPanel1.setBackground(new java.awt.Color(0, 204, 204));
 
+        jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
+        jLabel1.setText("IO SIMPLEX");
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addGap(365, 365, 365)
+                .addComponent(jLabel1)
+                .addContainerGap(353, Short.MAX_VALUE))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jLabel1)
+        );
+
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel2.setText("Z = ");
+
+        javax.swing.GroupLayout jPanel5ZETALayout = new javax.swing.GroupLayout(jPanel5ZETA);
+        jPanel5ZETA.setLayout(jPanel5ZETALayout);
+        jPanel5ZETALayout.setHorizontalGroup(
+            jPanel5ZETALayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5ZETALayout.createSequentialGroup()
+                .addGap(110, 110, 110)
+                .addComponent(jLabel2)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel5ZETALayout.setVerticalGroup(
+            jPanel5ZETALayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5ZETALayout.createSequentialGroup()
+                .addGap(35, 35, 35)
+                .addComponent(jLabel2)
+                .addContainerGap(40, Short.MAX_VALUE))
+        );
+
+        jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jLabel3.setText("Restricciones");
+
+        javax.swing.GroupLayout jPanel5resLayout = new javax.swing.GroupLayout(jPanel5res);
+        jPanel5res.setLayout(jPanel5resLayout);
+        jPanel5resLayout.setHorizontalGroup(
+            jPanel5resLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5resLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel5resLayout.setVerticalGroup(
+            jPanel5resLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5resLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel3)
+                .addContainerGap(386, Short.MAX_VALUE))
+        );
+
+        jButton4.setBackground(new java.awt.Color(47, 111, 237));
+        jButton4.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jButton4.setForeground(new java.awt.Color(255, 255, 255));
+        jButton4.setText("Continuar");
+        jButton4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton4MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 960, Short.MAX_VALUE)
+            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jPanel5res, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel5ZETA, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton4)
+                .addGap(23, 23, 23))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 666, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(90, 90, 90)
+                .addComponent(jPanel5ZETA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel5res, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(27, 27, 27)
+                .addComponent(jButton4)
+                .addContainerGap(30, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -50,7 +191,7 @@ public class ZRestricciones extends javax.swing.JFrame {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(125, Short.MAX_VALUE)
+                .addContainerGap(119, Short.MAX_VALUE)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(120, 120, 120))
         );
@@ -73,44 +214,93 @@ public class ZRestricciones extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+ public static float[] obtenerValoresJTextFields(JPanel panel) {
+    int cantidadJTextFields = contarJTextFields(panel);
+    float[] valores = new float[cantidadJTextFields];
+    int indice = 0;
+    for (java.awt.Component componente : panel.getComponents()) {
+        if (componente instanceof JTextField) {
+            JTextField textField = (JTextField) componente;
+            try {
+                float valor = Float.parseFloat(textField.getText());
+                valores[indice++] = valor;
+            } catch (NumberFormatException e) {
+                // Manejo de errores si el texto no se puede convertir a float
+                System.err.println("Error al convertir el texto a float: " + textField.getText());
+            }
+        }
+    }
+    return valores;
+}
+
+public static int contarJTextFields(JPanel panel) {
+    int cantidad = 0;
+    for (java.awt.Component componente : panel.getComponents()) {
+        if (componente instanceof JTextField) {
+            cantidad++;
+        }
+    }
+    return cantidad;
+}
+// Dentro de la clase ZRestricciones
+// Dentro de la clase ZRestricciones
+public static float[][] obtenerValoresJTextFieldsRes(JPanel panel, int filas, int columnas) {
+    float[][] valores = new float[filas][columnas];
+    int fila = 0;
+    int columna = 0;
+    for (java.awt.Component componente : panel.getComponents()) {
+        if (componente instanceof JTextField) {
+            JTextField textField = (JTextField) componente;
+            try {
+                float valor = Float.parseFloat(textField.getText());
+                valores[fila][columna] = valor;
+                columna++;
+                if (columna == columnas) {
+                    columna = 0;
+                    fila++;
+                }
+            } catch (NumberFormatException e) {
+                // Manejo de errores si el texto no se puede convertir a float));
+            }
+        }
+    }
+    return valores;
+}
+
+
+public static int contarJTextFieldsRes(JPanel panel) {
+    int cantidad = 0;
+    for (java.awt.Component componente : panel.getComponents()) {
+        if (componente instanceof JTextField) {
+            cantidad++;
+        }
+    }
+    return cantidad;
+}
+
+    
+    private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
+        float[] z = obtenerValoresJTextFields(jPanel5ZETA);
+        float[][] r = obtenerValoresJTextFieldsRes(jPanel5res, this.restricciones, variables + 2);
+        Solucion sol = new Solucion(z, r);
+        sol.setVisible(true);
+        this.dispose();
+    }//GEN-LAST:event_jButton4MouseClicked
+
     /**
      * @param args the command line arguments
      */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(ZRestricciones.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(ZRestricciones.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(ZRestricciones.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(ZRestricciones.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
 
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new ZRestricciones().setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton4;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel5ZETA;
+    private javax.swing.JPanel jPanel5res;
     // End of variables declaration//GEN-END:variables
 }
