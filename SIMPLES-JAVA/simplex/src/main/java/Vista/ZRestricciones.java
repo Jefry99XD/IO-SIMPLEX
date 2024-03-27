@@ -215,8 +215,7 @@ public class ZRestricciones extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
  public static float[] obtenerValoresJTextFields(JPanel panel) {
-    int cantidadJTextFields = contarJTextFields(panel);
-    float[] valores = new float[cantidadJTextFields];
+    float[] valores = new float[contarJTextFields(panel)];
     int indice = 0;
     for (java.awt.Component componente : panel.getComponents()) {
         if (componente instanceof JTextField) {
@@ -225,8 +224,6 @@ public class ZRestricciones extends javax.swing.JFrame {
                 float valor = Float.parseFloat(textField.getText());
                 valores[indice++] = valor;
             } catch (NumberFormatException e) {
-                // Manejo de errores si el texto no se puede convertir a float
-                System.err.println("Error al convertir el texto a float: " + textField.getText());
             }
         }
     }
@@ -242,8 +239,6 @@ public static int contarJTextFields(JPanel panel) {
     }
     return cantidad;
 }
-// Dentro de la clase ZRestricciones
-// Dentro de la clase ZRestricciones
 public static float[][] obtenerValoresJTextFieldsRes(JPanel panel, int filas, int columnas) {
     float[][] valores = new float[filas][columnas];
     int fila = 0;
@@ -260,7 +255,6 @@ public static float[][] obtenerValoresJTextFieldsRes(JPanel panel, int filas, in
                     fila++;
                 }
             } catch (NumberFormatException e) {
-                // Manejo de errores si el texto no se puede convertir a float));
             }
         }
     }
