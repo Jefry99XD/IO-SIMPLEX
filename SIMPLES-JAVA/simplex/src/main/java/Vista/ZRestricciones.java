@@ -50,8 +50,7 @@ public class ZRestricciones extends javax.swing.JFrame {
     
     private int restricciones;
     private int variables;
-    
-    private ArrayList<JTextField> textFieldListZetas; 
+   
     private ArrayList<ArrayList<JTextField>> resMatrix;
     
     public int getRestricciones() {
@@ -226,7 +225,7 @@ public class ZRestricciones extends javax.swing.JFrame {
  public static float[] obtenerValoresJTextFields(JPanel panel) {
     float[] valores = new float[contarJTextFields(panel)];
     int indice = 0;
-    for (java.awt.Component componente : panel.getComponents()) {
+    for (Component componente : panel.getComponents()) {
         if (componente instanceof JTextField) {
             JTextField textField = (JTextField) componente;
             try {
@@ -260,7 +259,7 @@ public static int contarJTextFields(JPanel panel) {
     }//GEN-LAST:event_jButton4MouseClicked
 
         public float[][] obtenerValores() {
-        float[][] matriz = new float[restricciones][variables + 1]; // +1 para el campo de resultado
+        float[][] matriz = new float[restricciones][variables + 1]; 
         for (int i = 0; i < restricciones; i++) {
             ArrayList<JTextField> fila = resMatrix.get(i);
             for (int j = 0; j < fila.size(); j++) {
@@ -270,7 +269,7 @@ public static int contarJTextFields(JPanel panel) {
                     float valorFloat = Float.parseFloat(valorTexto);
                     matriz[i][j] = valorFloat;
                 } catch (NumberFormatException e) {
-                    // Manejo de errores si el texto no es un número válido
+                    
                 }
             }
         }

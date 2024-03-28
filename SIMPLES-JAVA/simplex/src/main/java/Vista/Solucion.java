@@ -43,9 +43,7 @@ public class Solucion extends javax.swing.JFrame {
         columnasList.add("RHS");
         columnasList.add("RADIO");
         String[] columnas = new String[columnasList.size()];
-        columnas = columnasList.toArray(columnas);
-        
-        return columnas;
+        return columnasList.toArray(columnas);
     }
 public void createTable(int it, float[] variablesZ, float[][] MRestricciones){
     float table[][] = iteraciones.get(it);
@@ -57,11 +55,10 @@ public void createTable(int it, float[] variablesZ, float[][] MRestricciones){
             tableData[i][j] = table[i][j];
         }
     }
-    
     DefaultTableModel t = new DefaultTableModel(tableData, columnas);
     JTable jt = new JTable(t);
-    jt.setPreferredScrollableViewportSize(new Dimension(800, 300)); // Establece un tamaño preferido más grande
-    matrixpanel.add(new JScrollPane(jt)); // Agrega la tabla dentro de un JScrollPane
+    jt.setPreferredScrollableViewportSize(new Dimension(800, 300)); 
+    matrixpanel.add(new JScrollPane(jt));
     matrixpanel.revalidate();
 }
 
