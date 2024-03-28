@@ -5,6 +5,7 @@
 package Vista;
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 
 /**
  *
@@ -18,7 +19,7 @@ public class ZRestricciones extends javax.swing.JFrame {
     public ZRestricciones(int r,int v) {
         this.restricciones = r;
         this.variables = v;
-        
+        this.resMatrix = new ArrayList<>();
         initComponents();
         for (int i = 0; i < v; i++) {
         jPanel5ZETA.add(new JTextField(5));
@@ -30,21 +31,29 @@ public class ZRestricciones extends javax.swing.JFrame {
         jPanel5res.add(new JSeparator(SwingConstants.HORIZONTAL));
         for (int i = 0; i < r; i++) {
             JPanel rowPanel = new JPanel(new GridLayout(1, v + 1));
+            ArrayList<JTextField> rowFields = new ArrayList<>();
             for (int j = 0; j < v; j++) {
-                rowPanel.add(new JTextField(5));
-                rowPanel.add(new JLabel("x"+(i+1)));
+                JTextField textField = new JTextField(5);
+                rowPanel.add(textField);
+                rowFields.add(textField);
             }
-            rowPanel.add(new JComboBox(conditions));
-            rowPanel.add(new JTextField(5)); 
+            rowPanel.add(new JComboBox<>(conditions));
+            JTextField resultField = new JTextField(5);
+            rowPanel.add(resultField);
+            rowFields.add(resultField);
             jPanel5res.add(new JPanel());
-            jPanel5res.add(rowPanel); 
+            jPanel5res.add(rowPanel);
+            resMatrix.add(rowFields);
         }
         
     }
     
     private int restricciones;
     private int variables;
-
+    
+    private ArrayList<JTextField> textFieldListZetas; 
+    private ArrayList<ArrayList<JTextField>> resMatrix;
+    
     public int getRestricciones() {
         return restricciones;
     }
@@ -239,48 +248,34 @@ public static int contarJTextFields(JPanel panel) {
     }
     return cantidad;
 }
-public static float[][] obtenerValoresJTextFieldsRes(JPanel panel, int filas, int columnas) {
-    float[][] valores = new float[filas][columnas];
-    int fila = 0;
-    int columna = 0;
-    for (java.awt.Component componente : panel.getComponents()) {
-        if (componente instanceof JTextField) {
-            JTextField textField = (JTextField) componente;
-            try {
-                float valor = Float.parseFloat(textField.getText());
-                valores[fila][columna] = valor;
-                columna++;
-                if (columna == columnas) {
-                    columna = 0;
-                    fila++;
-                }
-            } catch (NumberFormatException e) {
-            }
-        }
-    }
-    return valores;
-}
 
-
-public static int contarJTextFieldsRes(JPanel panel) {
-    int cantidad = 0;
-    for (java.awt.Component componente : panel.getComponents()) {
-        if (componente instanceof JTextField) {
-            cantidad++;
-        }
-    }
-    return cantidad;
-}
 
     
     private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
         float[] z = obtenerValoresJTextFields(jPanel5ZETA);
-        float[][] r = obtenerValoresJTextFieldsRes(jPanel5res, this.restricciones, variables + 2);
+        float[][] r = obtenerValores();
         Solucion sol = new Solucion(z, r);
         sol.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton4MouseClicked
 
+        public float[][] obtenerValores() {
+        float[][] matriz = new float[restricciones][variables + 1]; // +1 para el campo de resultado
+        for (int i = 0; i < restricciones; i++) {
+            ArrayList<JTextField> fila = resMatrix.get(i);
+            for (int j = 0; j < fila.size(); j++) {
+                JTextField textField = fila.get(j);
+                String valorTexto = textField.getText();
+                try {
+                    float valorFloat = Float.parseFloat(valorTexto);
+                    matriz[i][j] = valorFloat;
+                } catch (NumberFormatException e) {
+                    // Manejo de errores si el texto no es un número válido
+                }
+            }
+        }
+        return matriz;
+    }
     /**
      * @param args the command line arguments
      */
