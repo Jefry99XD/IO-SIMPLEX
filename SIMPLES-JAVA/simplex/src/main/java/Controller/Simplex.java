@@ -5,6 +5,7 @@
 package Controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 //este 
 /**
@@ -190,6 +191,7 @@ public class Simplex {
         float pivote = getPivote(indiceMenorZ);
         int indiceSalida = getSalida();
         actualizarTabla(indiceSalida, indiceMenorZ, pivote);
+        iteraciones.add(Arrays.stream(iteraciones.get(iteraciones.size() - 1)).map(float[]::clone).toArray(float[][]::new));
     }
     
     //-----------------------------------------
@@ -280,7 +282,7 @@ public class Simplex {
         // Actualiza las variables de salida y entrada para la interfaz
         Saliente = "x" + (indiceSalida - 1); // Restamos 1 porque la primera fila corresponde a Z
         Entrante = "x" + indiceEntrada;
-        iteraciones.add(tabla);
+        iteraciones.set(iteraciones.size() - 1, tabla);
     }
     
     //-----------------------------------------
