@@ -61,11 +61,14 @@ public class Simplex {
     */
     
     //Convierte la Z en su signo opuesto
-    public void convertirOpuestosZ(float[] zeta){
-        for (int i = 0; i < zeta.length; i++){
-            zeta[i] = -zeta[i];
+    public void convertirOpuestosZ(float[] zeta) {
+        for (int i = 0; i < zeta.length; i++) {
+            if (zeta[i] != 0) { // Verifica si el elemento no es igual a 0
+                zeta[i] = -zeta[i];
+            }
         }
     }
+
     
     //-----------------------------------------
     //-----------------------------------------
@@ -78,7 +81,8 @@ public class Simplex {
 
         // crea la matriz tablaInicial, que contiene z y las restricciones
         // junto con las variables de holgura
-        float[][] tablaInicial = new float[zeta.length + 1][];
+        float[][] tablaInicial = new float[restricciones.length + 1][zeta.length + restricciones[0].length];
+
         for (int i = 0; i < tablaInicial.length; i++) {
             tablaInicial[i] = new float[restricciones[0].length + restricciones.length];
         }
@@ -138,14 +142,23 @@ public class Simplex {
                     }
                 }
 
+                // Calcula el radio
                 float radio = tabla[i][tabla[i].length - 1] / tabla[i][indiceMasNegativo];
-                System.out.printf("      %.2f ", radio);
+
+                // Si el radio es negativo, muestra "Infinity"
+                if (radio < 0) {
+                    System.out.printf("      %d ", -1 );
+                } else {
+                    System.out.printf("      %.2f ", radio);
+                }
             }
 
             // Agregar un salto de línea después de imprimir cada fila
             System.out.println(); 
         }
     }
+
+
 
     //-----------------------------------------
     //-----------------------------------------
@@ -189,9 +202,11 @@ public class Simplex {
     public void iteracion() {
         int indiceMenorZ = menorZ();
         float pivote = getPivote(indiceMenorZ);
-        int indiceSalida = getSalida();
+        int indiceSalida = getSalida(indiceMenorZ);
         actualizarTabla(indiceSalida, indiceMenorZ, pivote);
-        iteraciones.add(Arrays.stream(iteraciones.get(iteraciones.size() - 1)).map(float[]::clone).toArray(float[][]::new));
+        iteraciones.add(iteraciones.get(iteraciones.size() - 1));
+
+        //iteraciones.add(Arrays.stream(iteraciones.get(iteraciones.size() - 1)).map(float[]::clone).toArray(float[][]::new));
     }
     
     //-----------------------------------------
@@ -219,32 +234,32 @@ public class Simplex {
     //-----------------------------------------
     // Encuentra el índice de la variable de salida en función del radio de la tabla actual.
     // Retorna el índice de la fila con el radio más pequeño :)
-    public int getSalida() {
-        // Obtiene la última iteración de la tabla
-        float[][] actual = iteraciones.get(iteraciones.size() - 1);
+    public int getSalida(int indiceEntrada) {
+    // Obtiene la última iteración de la tabla
+    float[][] actual = iteraciones.get(iteraciones.size() - 1);
+    
+    // Inicializa el índice de la variable de salida como 1 (excluyendo la fila Z)
+    int indiceSalida = 1;
+    
+    float menorRadio = Float.MAX_VALUE;
+    
+    // Itera sobre las filas de la tabla (excluyendo la fila Z)
+    for (int i = 1; i < actual.length; i++) {
+        // Calcula el radio dividiendo el término independiente entre el coeficiente correspondiente a la variable de entrada
+        float radio = actual[i][actual[i].length - 1] / actual[i][indiceEntrada];
         
-        // Inicializa el índice de la variable de salida como 1 (excluyendo la fila Z)
-        int indiceSalida = 1;
-        
-        float menorRadio = Float.MAX_VALUE;
-        
-        // Itera sobre las filas de la tabla (excluyendo la fila Z)
-        for (int i = 1; i < actual.length; i++) {
+        // Compara si el radio actual es menor que el radio anterior
+        if (radio < menorRadio && radio > 0) {
+            // Actualiza el menor radio si se encuentra uno menor
+            menorRadio = radio;
             
-            // Obtiene el valor del radio en la última columna de la fila actual
-            float radio = actual[i][actual[i].length - 1];
-            
-            // Compara si el radio actual es menor que el radio anterior
-            if (radio < menorRadio) {
-                // Actualiza el menor radio si se encuentra uno menor
-                menorRadio = radio;
-                
-                // Actualiza el índice de la fila con el radio más pequeño
-                indiceSalida = i;
-            }
+            // Actualiza el índice de la fila con el radio más pequeño
+            indiceSalida = i;
         }
-        return indiceSalida;
     }
+    return indiceSalida;
+}
+
     
     //-----------------------------------------
     //-----------------------------------------
@@ -254,17 +269,26 @@ public class Simplex {
     public void actualizarTabla(int indiceSalida, int indiceEntrada, float pivote) {
         float[][] tabla = iteraciones.get(iteraciones.size() - 1);
         float[] filaSalida = tabla[indiceSalida];
-        float divisor = filaSalida[indiceEntrada];
+        // float divisor = filaSalida[indiceEntrada];
+        float divisor = getPivote(indiceEntrada);
+        
+        //System.out.println("Pivote: " + divisor);
+        //System.out.println("Índice de salida: " + indiceSalida);
+        //System.out.println("Índice de entrada: " + indiceEntrada);
+
 
         // Divide toda la fila de salida por el pivote
         for (int i = 0; i < filaSalida.length; i++) {
             filaSalida[i] /= divisor;
+            //System.out.println("Nuevo valor en filaSalida[" + i + "]: " + filaSalida[i]);
         }
 
         // Actualiza las otras filas
         for (int i = 0; i < tabla.length; i++) {
             if (i != indiceSalida) {
                 float factor = tabla[i][indiceEntrada];
+                //System.out.println("Factor en fila " + i + ": " + factor);
+                //System.out.println("Fila " + i + ": " + Arrays.toString(tabla[i]));
                 for (int j = 0; j < tabla[i].length; j++) {
                     tabla[i][j] -= factor * filaSalida[j];
                 }
@@ -290,63 +314,45 @@ public class Simplex {
 
     public float getPivote(int indiceMasNegativo) {
         float[][] actual = iteraciones.get(iteraciones.size() - 1); // Obtener la última iteración
-        float menorValorZ = Float.MAX_VALUE;                        // Inicializar el menor valor de Z como el máximo posible
-        float menorValorRadio = Float.MAX_VALUE;                    // Inicializar el menor valor de la columna de los radios
-        int menorRadioIndice = 0;
-        float pivote = 0; 
+        float menorValorZ = Float.MAX_VALUE; // Inicializar el menor valor de Z como el máximo posible
+        float menorValorRadioPositivo = Float.MAX_VALUE; // Inicializar el menor valor positivo de la columna de los radios
+        int indiceFilaPivote = -1;
+
         // Encontrar el valor más negativo en Z
         for (int i = 0; i < actual.length; i++) {
             if (actual[i][indiceMasNegativo] < menorValorZ) {
                 menorValorZ = actual[i][indiceMasNegativo];
             }
         }
-        // Buscar el menor valor en la columna de los radios
+
+        // Encontrar el menor valor positivo en la columna de los radios
         for (int i = 1; i < actual.length; i++) {
-            float valorActual = actual[i][actual[i].length - 1];
-            if (valorActual < menorValorRadio) {
-                menorValorRadio = valorActual;
-                menorRadioIndice = i;
+            // Evitar divisiones por cero
+            if (actual[i][indiceMasNegativo] != 0) {
+                float valorRadio = actual[i][actual[i].length - 1] / actual[i][indiceMasNegativo];
+                if (valorRadio >= 0 && valorRadio < menorValorRadioPositivo) {
+                    menorValorRadioPositivo = valorRadio;
+                    indiceFilaPivote = i;
+                }
             }
         }
+
+        // Si no se encontró ningún radio positivo, retornar -1 para indicar que no hay pivote válido
+        if (indiceFilaPivote == -1) {
+            System.out.println("No se encontró un pivote válido.");
+            return -1;
+        }
+
+        // Imprimir el valor del pivote y el valor más negativo en Z
         //System.out.println("Valor más negativo en Z: " + menorValorZ);
-        //System.out.println("Valor más pequeño en radio: " + menorValorRadio);
-        
-        // Encontrar el pivote
-        pivote = actual[menorRadioIndice][indiceMasNegativo];
-        //System.out.println("Pivote: " + pivote);
+        //System.out.println("Pivote: " + actual[indiceFilaPivote][indiceMasNegativo]);
+
         // Devolver el valor del pivote
-        return pivote;
+        return actual[indiceFilaPivote][indiceMasNegativo];
     }
+
 
     //-----------------------------------------
     //-----------------------------------------
-    public void CalcularRadios(int indiceMasNegativo) {
-        float[][] ultimaIteracion = iteraciones.get(iteraciones.size() - 1);
-
-        for (int i = 1; i < ultimaIteracion.length; i++) {
-            float valorMasNegativo = ultimaIteracion[i][indiceMasNegativo];
-            float valorUltimaColumna = ultimaIteracion[i][ultimaIteracion[i].length - 1];
-
-            float radio;
-
-            if (valorMasNegativo != 0) {
-                radio = valorUltimaColumna / valorMasNegativo;
-            } else {
-                radio = Float.POSITIVE_INFINITY;
-            }
-
-            if (radio < 0) {
-                radio = Float.POSITIVE_INFINITY;
-            }
-
-            // Asignar el nuevo valor del radio al final de la fila
-            ultimaIteracion[i][ultimaIteracion[i].length - 1] = radio;
-        }
-
-        // Mostrar la tabla actualizada con los radios
-        System.out.println("Tabla con radios:");
-        imprimirTabla(ultimaIteracion);
-    }
-
-  
+    
 }

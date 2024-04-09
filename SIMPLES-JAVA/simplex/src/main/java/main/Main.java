@@ -5,8 +5,9 @@ import Controller.Simplex;
 public class Main {
 
     public static void main(String[] args) {
-        float[] z = {5,4};
-        float[][] restricciones = {{2, -1, 4},{5, 3, 15}};
+        float[] z = {1, -2, 1};
+        float[][] restricciones = {{1, 1, 1, 12}, {2, 1, -1, 6}, {-1, 3, 9}};
+
 
         Simplex simplex = new Simplex(z, restricciones);
         simplex.resolver();
