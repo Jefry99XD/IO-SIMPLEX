@@ -8,6 +8,7 @@ import Controller.Simplex;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
+import java.util.Arrays;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.*;
@@ -23,14 +24,20 @@ public class Solucion extends javax.swing.JFrame {
      */
     
     private ArrayList<float[][]> iteraciones = new ArrayList<>();
-    public int actual = 0;
+    float[] variablesZ;
+    float[][] MRestricciones;
+    public int actual;
     
     public Solucion(float[] variablesZ, float[][] MRestricciones) {
-        Simplex s = new Simplex(variablesZ, MRestricciones);        
+        this.actual = 1;
+        this.variablesZ = variablesZ;
+        this.MRestricciones = MRestricciones;
+        Simplex s = new Simplex(variablesZ, MRestricciones);
+        s.resolver();
         this.iteraciones = s.getIteraciones();
         initComponents();
         matrixpanel.setLayout(new GridLayout(1, 1));
-        createTable(0,variablesZ, MRestricciones);  
+        createTable(this.actual, variablesZ, MRestricciones);  
     }
     public String[] NombresColumnas(float[] variablesZ, float[][] MRestricciones){
         ArrayList<String> columnasList = new ArrayList<>();
@@ -41,25 +48,36 @@ public class Solucion extends javax.swing.JFrame {
             columnasList.add("s" + (i-1+MRestricciones[0].length));
         }
         columnasList.add("RHS");
-        columnasList.add("RADIO");
+        //columnasList.add("RADIO");
         String[] columnas = new String[columnasList.size()];
         return columnasList.toArray(columnas);
     }
-public void createTable(int it, float[] variablesZ, float[][] MRestricciones){
-    float table[][] = iteraciones.get(it);
-    String [] columnas = NombresColumnas(variablesZ, MRestricciones);
+public void createTable(int it, float[] variablesZ, float[][] MRestricciones) {
+    matrixpanel.removeAll(); // Limpiar el panel antes de agregar la nueva tabla
     
-    Object[][] tableData = new Object[table.length][table[0].length];
-    for (int i = 0; i < table.length; i++) {
-        for (int j = 0; j < table[i].length; j++) {
-            tableData[i][j] = table[i][j];
+    // Obtener los datos de la iteración actual
+    float[][] iteracionActual = iteraciones.get(it);
+    
+    // Crear un nuevo modelo de tabla
+    DefaultTableModel model = new DefaultTableModel(iteracionActual.length, iteracionActual[0].length);
+    
+    // Llenar el modelo de tabla con los datos de la iteración actual
+    for (int i = 0; i < iteracionActual.length; i++) {
+        for (int j = 0; j < iteracionActual[i].length; j++) {
+            model.setValueAt(iteracionActual[i][j], i, j);
         }
     }
-    DefaultTableModel t = new DefaultTableModel(tableData, columnas);
-    JTable jt = new JTable(t);
-    jt.setPreferredScrollableViewportSize(new Dimension(800, 300)); 
-    matrixpanel.add(new JScrollPane(jt));
+    
+    // Crear la tabla con el modelo de datos
+    JTable table = new JTable(model);
+    
+    // Agregar la tabla al panel con scroll
+    JScrollPane scrollPane = new JScrollPane(table);
+    matrixpanel.add(scrollPane);
+    
+    // Refrescar la interfaz
     matrixpanel.revalidate();
+    matrixpanel.repaint();
 }
 
     public ArrayList<float[][]> getIteraciones() {
@@ -86,6 +104,11 @@ public void createTable(int it, float[] variablesZ, float[][] MRestricciones){
         jPanel3 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         matrixpanel = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
+        jButton4 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 204, 204));
@@ -122,23 +145,80 @@ public void createTable(int it, float[] variablesZ, float[][] MRestricciones){
             .addGap(0, 486, Short.MAX_VALUE)
         );
 
+        jButton1.setText("Previous Table");
+        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton1MouseClicked(evt);
+            }
+        });
+
+        jButton2.setText("Next Table");
+        jButton2.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton2MouseClicked(evt);
+            }
+        });
+
+        jButton3.setText("Resultados");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel4Layout.createSequentialGroup()
+                .addGap(35, 35, 35)
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(119, 119, 119)
+                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(105, 105, 105))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
+                .addGap(28, 28, 28)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+        );
+
+        jButton4.setText("Inicio");
+        jButton4.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton4MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(126, Short.MAX_VALUE)
-                .addComponent(matrixpanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(96, Short.MAX_VALUE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(matrixpanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(96, 96, 96))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(136, 136, 136)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(46, 46, 46)
                 .addComponent(matrixpanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(228, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(122, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -169,12 +249,38 @@ public void createTable(int it, float[] variablesZ, float[][] MRestricciones){
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
+        if (actual > 0) {
+                actual -= 1;
+                createTable(actual, variablesZ, MRestricciones);
+            }
+    }//GEN-LAST:event_jButton1MouseClicked
+
+    private void jButton2MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton2MouseClicked
+    if (actual < iteraciones.size() - 1) {
+        actual += 1;
+        createTable(actual, variablesZ, MRestricciones);
+    }
+    }//GEN-LAST:event_jButton2MouseClicked
+
+    private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
+        Entrada e = new Entrada();
+        this.dispose();
+        e.setVisible(true);
+        
+    }//GEN-LAST:event_jButton4MouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
+    private javax.swing.JButton jButton4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel matrixpanel;
     // End of variables declaration//GEN-END:variables
 }
