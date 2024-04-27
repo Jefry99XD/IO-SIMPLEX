@@ -28,11 +28,11 @@ public class Solucion extends javax.swing.JFrame {
     float[][] MRestricciones;
     public int actual;
     
-    public Solucion(float[] variablesZ, float[][] MRestricciones) {
+    public Solucion(float[] variablesZ, float[][] MRestricciones, String tipo, String metodo) {
         this.actual = 1;
         this.variablesZ = variablesZ;
         this.MRestricciones = MRestricciones;
-        Simplex s = new Simplex(variablesZ, MRestricciones);
+        Simplex s = new Simplex(variablesZ, MRestricciones, tipo, metodo);
         s.resolver();
         this.iteraciones = s.getIteraciones();
         initComponents();

@@ -12,11 +12,15 @@ import java.util.ArrayList;
  * @author jeffr
  */
 public class ZRestricciones extends javax.swing.JFrame {
+    private final String tipo;
+    private final String metodo;
 
     /**
      * Creates new form Entrada
      */
-    public ZRestricciones(int r,int v) {
+    public ZRestricciones(int r,int v, String tipo, String metodo) {
+        this.metodo = metodo;
+        this.tipo = tipo;
         this.restricciones = r;
         this.variables = v;
         this.resMatrix = new ArrayList<>();
@@ -253,7 +257,7 @@ public static int contarJTextFields(JPanel panel) {
     private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
         float[] z = obtenerValoresJTextFields(jPanel5ZETA);
         float[][] r = obtenerValores();
-        Solucion sol = new Solucion(z, r);
+        Solucion sol = new Solucion(z, r, tipo, metodo);
         sol.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton4MouseClicked

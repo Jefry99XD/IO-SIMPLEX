@@ -5,8 +5,6 @@
 package Controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 //este 
 /**
  *
@@ -15,7 +13,18 @@ import java.util.List;
 public class Simplex {
     //guarda las iteraciones
     private ArrayList<float[][]> iteraciones = new ArrayList<>();
+    
+    //para saber si hay artificiales
+    private int[] indiceArtificiales;
+    
+    //gran m, normal o 2 fases  
+    private String metodo;
+    
+    //minimizar o maximizar
+    private String tipo;
     //para devolver el saliente, pa la interfaz
+    
+    
     private String Saliente;
     //para devolver el Entrante, pa la interfaz
     private String Entrante;
@@ -47,6 +56,7 @@ public class Simplex {
     }
     
     
+    
     //constructor, recibe funcion z, y las restricciones como matriz, se asume que de la interfaz las que no hay son 0
     
     /*Ejemplo de entrada
@@ -74,11 +84,15 @@ public class Simplex {
     //-----------------------------------------
     //Inicializa la tabla inicial
     
-    public Simplex(float[] zeta, float[][] restricciones) {
-        
+    public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo) {
+        this.metodo = metodo;
+        this.tipo = tipo;
         //Convierte los coeficientes de z, en su signo opuesto
-        convertirOpuestosZ(zeta);
-
+        if("Maximizar".equals(this.tipo)){
+            convertirOpuestosZ(zeta);
+        }
+           
+        
         // crea la matriz tablaInicial, que contiene z y las restricciones
         // junto con las variables de holgura
         float[][] tablaInicial = new float[restricciones.length + 1][zeta.length + restricciones[0].length];
@@ -165,8 +179,29 @@ public class Simplex {
     //Itera sobre las iteraciones  hasta que no haya valores negativos en la fila Z. 
     //En cada iteración, muestra la tabla resultante y actualiza la tabla actual con la función iteracion(). 
     public void resolver() {
+        if ("Gran M".equals(metodo)) {
+            simplexGranM();
+        } else if ("Dos Fases".equals(metodo)) {
+            simplexDosFases();
+        } else {
+            simplexNormal();
+        }
+        if("Minimizar".equals(tipo)){
+            float[][] ultimaMatriz = iteraciones.get(iteraciones.size() - 1);
+            ultimaMatriz[0][ultimaMatriz[0].length-1] *=-1; 
+        }
+        // Mostrar la tabla final
+        System.out.println("");
+        System.out.println("Tabla final:");
+        System.out.println("");
+        imprimirTabla(iteraciones.get(iteraciones.size() - 1));
+    }
+    
+    
+    //funcion que usa el simplex normal
+    public void simplexNormal(){
         int iteracion = 0;
-        while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
+                while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
             
             // Muestra la tabla después de cada iteración
             System.out.println("");
@@ -176,13 +211,11 @@ public class Simplex {
             imprimirTabla(iteraciones.get(iteraciones.size() - 1));
             iteracion++; // Incrementa el número de iteración
         }
-
-        // Mostrar la tabla final
-        System.out.println("");
-        System.out.println("Tabla final:");
-        System.out.println("");
-        imprimirTabla(iteraciones.get(iteraciones.size() - 1));
     }
+    
+    public void simplexDosFases(){}
+    
+    public void simplexGranM(){}
         
     //-----------------------------------------
     //-----------------------------------------
@@ -319,9 +352,9 @@ public class Simplex {
         int indiceFilaPivote = -1;
 
         // Encontrar el valor más negativo en Z
-        for (int i = 0; i < actual.length; i++) {
-            if (actual[i][indiceMasNegativo] < menorValorZ) {
-                menorValorZ = actual[i][indiceMasNegativo];
+        for (float[] actual1 : actual) {
+            if (actual1[indiceMasNegativo] < menorValorZ) {
+                menorValorZ = actual1[indiceMasNegativo];
             }
         }
 
@@ -350,9 +383,15 @@ public class Simplex {
         // Devolver el valor del pivote
         return actual[indiceFilaPivote][indiceMasNegativo];
     }
-
-
-    //-----------------------------------------
-    //-----------------------------------------
+    
+    //funcion para devolver los resultados de la ultima iteracion de z y variables.
+    public ArrayList obtenerResultados(){
+        float [][] ultima = iteraciones.get(iteraciones.size()-1);
+        ArrayList resultados = new ArrayList();
+        for (float[] ultima1 : ultima) {
+            resultados.add(ultima1[ultima1.length-1]);
+        }
+        return resultados;
+    }
     
 }
