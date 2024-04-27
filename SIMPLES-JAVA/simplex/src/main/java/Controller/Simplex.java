@@ -14,6 +14,7 @@ public class Simplex {
     //guarda las iteraciones
     private ArrayList<float[][]> iteraciones = new ArrayList<>();
     
+    private String [] igualdadesRestricciones;
     //para saber si hay artificiales
     private int[] indiceArtificiales;
     
@@ -84,7 +85,8 @@ public class Simplex {
     //-----------------------------------------
     //Inicializa la tabla inicial
     
-    public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo) {
+    public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo, String[] igualdades) {
+        this.igualdadesRestricciones = igualdades;
         this.metodo = metodo;
         this.tipo = tipo;
         //Convierte los coeficientes de z, en su signo opuesto
