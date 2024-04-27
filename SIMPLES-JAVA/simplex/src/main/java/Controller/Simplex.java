@@ -5,6 +5,7 @@
 package Controller;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 //este 
 /**
  *
@@ -85,55 +86,75 @@ public class Simplex {
     //-----------------------------------------
     //Inicializa la tabla inicial
     
-    public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo, String[] igualdades) {
-        this.igualdadesRestricciones = igualdades;
-        this.metodo = metodo;
-        this.tipo = tipo;
-        //Convierte los coeficientes de z, en su signo opuesto
-        if("Maximizar".equals(this.tipo)){
-            convertirOpuestosZ(zeta);
+public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo, String[] igualdades) {
+    this.igualdadesRestricciones = igualdades;
+    this.metodo = metodo;
+    this.tipo = tipo;
+
+    // Convierte los coeficientes de z en su signo opuesto si es maximización
+    if ("Maximizar".equals(this.tipo))
+        convertirOpuestosZ(zeta);
+
+    // Tamaño de la tablaInicial
+    int filaTabla = restricciones.length + 1;
+
+    // Verificar cuántas holguras y artificiales hay que crear.
+    int artificiales = 0;
+    int holguras = 0;
+    for (String igualdad : igualdades) {
+        if ("<=".equals(igualdad))
+            holguras++;
+        else if ("=".equals(igualdad))
+            artificiales++;
+        else if (">=".equals(igualdad)) {
+            artificiales++;
+            holguras++;
         }
-           
-        
-        // crea la matriz tablaInicial, que contiene z y las restricciones
-        // junto con las variables de holgura
-        float[][] tablaInicial = new float[restricciones.length + 1][zeta.length + restricciones[0].length];
-
-        for (int i = 0; i < tablaInicial.length; i++) {
-            tablaInicial[i] = new float[restricciones[0].length + restricciones.length];
-        }
-
-        // Copiar zeta y restricciones
-        System.arraycopy(zeta, 0, tablaInicial[0], 0, zeta.length);
-
-        // incorpora las restricciones junto con las variables de holgura necesarias
-        // para convertir las restricciones en ecuaciones
-        for (int i = 0; i < restricciones.length; i++) {
-            //pone las restricciones menos el ultimo, porque el ultimo es el de <=
-            System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
-
-            // para dar el valor de holgura
-            tablaInicial[i + 1][zeta.length + i] = 1;
-
-            // Copiar el último valor de la restricción
-            tablaInicial[i + 1][tablaInicial[i + 1].length - 1] = restricciones[i][restricciones[i].length - 1];
-        }
-
-        // Imprimir la tabla inicial para verificar
-        imprimirTabla(tablaInicial);
-        
-        //guarda la tabla 0 en las iteraciones
-        iteraciones.add(tablaInicial);
     }
+    int columnaTabla = zeta.length + artificiales + holguras + 1;
+
+    // Crear la matriz tablaInicial
+    float[][] tablaInicial = new float[filaTabla][columnaTabla];
+
+    // Copiar zeta y restricciones
+    System.arraycopy(zeta, 0, tablaInicial[0], 0, zeta.length);
+
+    // Índice para las variables artificiales
+    int indiceArtificiales = zeta.length;
+    // Índice para las variables de holgura
+    int indiceHolguras = zeta.length + artificiales;
+
+    for (int i = 0; i < restricciones.length; i++) {
+        // Copiar las restricciones menos el último valor, ya que es el de "<="
+        System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
+
+        // Asignar el valor adecuado a las variables de holgura y artificiales
+        if ("<=".equals(igualdades[i])) {
+            tablaInicial[i + 1][indiceHolguras + i] = 1;
+        } else if ("=".equals(igualdades[i])) {
+            tablaInicial[i + 1][indiceArtificiales + i] = 1;
+        } else if (">=".equals(igualdades[i])) {
+            tablaInicial[i + 1][indiceArtificiales + i] = -1;
+            tablaInicial[i + 1][indiceHolguras + i] = 1;
+        }
+        
+        // Copiar el último valor de la restricción
+        tablaInicial[i + 1][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
+    }
+
+    // Imprimir la tabla inicial para verificar
+    imprimirTabla(tablaInicial);
+
+    // Guardar la tabla 0 en las iteraciones
+    iteraciones.add(tablaInicial);
+}
+
+
     
     //-----------------------------------------
     //-----------------------------------------
     //   Imprime la tabla
     public void imprimirTabla(float[][] tabla) {
-
-        // Columna original más una para el radio
-        int columnasConRadio = tabla[0].length + 1; 
-
         //Recorre cada fila y columna de la tabla y luego los imprime
         for (int i = 0; i < tabla.length; i++) {
             for (int j = 0; j < tabla[i].length; j++) {
@@ -217,7 +238,9 @@ public class Simplex {
     
     public void simplexDosFases(){}
     
-    public void simplexGranM(){}
+    public void simplexGranM(){
+        
+    }
         
     //-----------------------------------------
     //-----------------------------------------
