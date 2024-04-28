@@ -17,15 +17,12 @@ public class Simplex {
     private float[] zeta;
     private float[][] restricciones;
     private ArrayList artificiales = new ArrayList();
-    
-    private String [] igualdadesRestricciones;
-    //para saber si hay artificiales
-    
+
     //gran m, normal o 2 fases  
-    private String metodo;
+    private final String metodo;
     
     //minimizar o maximizar
-    private String tipo;
+    private final String tipo;
     //para devolver el saliente, pa la interfaz
     
     
@@ -49,8 +46,6 @@ public class Simplex {
         this.Entrante = Entrante;
     }
 
-    
-    
     //las iteraciones
     public ArrayList<float[][]> getIteraciones() {
         return iteraciones;
@@ -89,7 +84,6 @@ public class Simplex {
     //Inicializa la tabla inicial
     
 public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo, String[] igualdades) {
-    this.igualdadesRestricciones = igualdades;
     this.zeta = zeta;
     this.restricciones=restricciones;
     this.metodo = metodo;
@@ -123,30 +117,23 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     // Copiar zeta y restricciones
     System.arraycopy(zeta, 0, tablaInicial[0], 0, zeta.length);
     for (int i = 0; i < restricciones.length; i++) {
-    // Copiar las restricciones menos el último valor, ya que es el término independiente
-    System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
+        // Copiar las restricciones menos el último valor, ya que es el término independiente
+        System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
 
-    // Asignar el valor adecuado a las variables de holgura y artificiales
-if ("<=".equals(igualdades[i])) {
-    tablaInicial[i + 1][zeta.length + i] = 1; // Variable de holgura
-} else if ("=".equals(igualdades[i])) {
-    tablaInicial[i + 1][zeta.length + holguras-2 + i] = 1; // artificial
-} else if (">=".equals(igualdades[i])) {
-    tablaInicial[i + 1][zeta.length-1 + i] = -1; // holgura
-    tablaInicial[i + 1][zeta.length + holguras-1 + i] = 1; // artificial
-}
-
-
-
-    
-    // Copiar el último valor de la restricción
-    tablaInicial[i + 1][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
-}
-
-
+        // Asignar el valor adecuado a las variables de holgura y artificiales
+            if ("<=".equals(igualdades[i])) {
+                tablaInicial[i + 1][zeta.length + i] = 1; // Variable de holgura
+            } else if ("=".equals(igualdades[i])) {
+                tablaInicial[i + 1][zeta.length + holguras-2 + i] = 1; // artificial
+            } else if (">=".equals(igualdades[i])) {
+                tablaInicial[i + 1][zeta.length-1 + i] = -1; // holgura
+                tablaInicial[i + 1][zeta.length + holguras-1 + i] = 1; // artificial
+            }
+        // Copiar el último valor de la restricción
+        tablaInicial[i + 1][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
+    }
     // Imprimir la tabla inicial para verificar
     imprimirTabla(tablaInicial);
-
     // Guardar la tabla 0 en las iteraciones
     iteraciones.add(tablaInicial);
 }
