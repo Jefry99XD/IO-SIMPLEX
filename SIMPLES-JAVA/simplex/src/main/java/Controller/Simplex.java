@@ -14,10 +14,12 @@ import java.util.Arrays;
 public class Simplex {
     //guarda las iteraciones
     private ArrayList<float[][]> iteraciones = new ArrayList<>();
+    private float[] zeta;
+    private float[][] restricciones;
     
     private String [] igualdadesRestricciones;
     //para saber si hay artificiales
-    private int[] indiceArtificiales;
+    private ArrayList indiceArtificiales = new ArrayList();
     
     //gran m, normal o 2 fases  
     private String metodo;
@@ -88,6 +90,8 @@ public class Simplex {
     
 public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo, String[] igualdades) {
     this.igualdadesRestricciones = igualdades;
+    this.zeta = zeta;
+    this.restricciones=restricciones;
     this.metodo = metodo;
     this.tipo = tipo;
 
@@ -132,10 +136,13 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
         if ("<=".equals(igualdades[i])) {
             tablaInicial[i + 1][indiceHolguras + i] = 1;
         } else if ("=".equals(igualdades[i])) {
+            //artificial
+            this.indiceArtificiales.add(indiceArtificiales + i);
             tablaInicial[i + 1][indiceArtificiales + i] = 1;
         } else if (">=".equals(igualdades[i])) {
             tablaInicial[i + 1][indiceArtificiales + i] = -1;
             tablaInicial[i + 1][indiceHolguras + i] = 1;
+            this.indiceArtificiales.add(indiceHolguras + i);
         }
         
         // Copiar el último valor de la restricción
@@ -148,9 +155,7 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     // Guardar la tabla 0 en las iteraciones
     iteraciones.add(tablaInicial);
 }
-
-
-    
+  
     //-----------------------------------------
     //-----------------------------------------
     //   Imprime la tabla
@@ -224,6 +229,7 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     //funcion que usa el simplex normal
     public void simplexNormal(){
         int iteracion = 0;
+        
                 while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
             
             // Muestra la tabla después de cada iteración
@@ -239,6 +245,24 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     public void simplexDosFases(){}
     
     public void simplexGranM(){
+        float m = 99999;
+        //acomodar z para que cumpla la gran M
+        float [][] matriz = iteraciones.get(0);
+        for (Object indiceArtificiale : indiceArtificiales) {
+            matriz[0][(int)indiceArtificiale] *= m ; 
+        }
+        //preparacion de Z
+        int iteracion = 0;
+            while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
+
+                // Muestra la tabla después de cada iteración
+                System.out.println("");
+                System.out.println("Tabla después de la iteración " + iteracion + ":");
+                System.out.println("");
+                iteracion();
+                imprimirTabla(iteraciones.get(iteraciones.size() - 1));
+                iteracion++; // Incrementa el número de iteración
+        }
         
     }
         
