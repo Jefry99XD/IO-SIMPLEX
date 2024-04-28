@@ -16,10 +16,10 @@ public class Simplex {
     private ArrayList<float[][]> iteraciones = new ArrayList<>();
     private float[] zeta;
     private float[][] restricciones;
+    private ArrayList artificiales = new ArrayList();
     
     private String [] igualdadesRestricciones;
     //para saber si hay artificiales
-    private ArrayList indiceArtificiales = new ArrayList();
     
     //gran m, normal o 2 fases  
     private String metodo;
@@ -122,32 +122,27 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
 
     // Copiar zeta y restricciones
     System.arraycopy(zeta, 0, tablaInicial[0], 0, zeta.length);
-
-    // Índice para las variables artificiales
-    int indiceArtificiales = zeta.length;
-    // Índice para las variables de holgura
-    int indiceHolguras = zeta.length + artificiales;
-
     for (int i = 0; i < restricciones.length; i++) {
-        // Copiar las restricciones menos el último valor, ya que es el de "<="
-        System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
+    // Copiar las restricciones menos el último valor, ya que es el término independiente
+    System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
 
-        // Asignar el valor adecuado a las variables de holgura y artificiales
-        if ("<=".equals(igualdades[i])) {
-            tablaInicial[i + 1][indiceHolguras + i] = 1;
-        } else if ("=".equals(igualdades[i])) {
-            //artificial
-            this.indiceArtificiales.add(indiceArtificiales + i);
-            tablaInicial[i + 1][indiceArtificiales + i] = 1;
-        } else if (">=".equals(igualdades[i])) {
-            tablaInicial[i + 1][indiceArtificiales + i] = -1;
-            tablaInicial[i + 1][indiceHolguras + i] = 1;
-            this.indiceArtificiales.add(indiceHolguras + i);
-        }
-        
-        // Copiar el último valor de la restricción
-        tablaInicial[i + 1][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
-    }
+    // Asignar el valor adecuado a las variables de holgura y artificiales
+if ("<=".equals(igualdades[i])) {
+    tablaInicial[i + 1][zeta.length + i] = 1; // Variable de holgura
+} else if ("=".equals(igualdades[i])) {
+    tablaInicial[i + 1][zeta.length + holguras-2 + i] = 1; // artificial
+} else if (">=".equals(igualdades[i])) {
+    tablaInicial[i + 1][zeta.length-1 + i] = -1; // holgura
+    tablaInicial[i + 1][zeta.length + holguras-1 + i] = 1; // artificial
+}
+
+
+
+    
+    // Copiar el último valor de la restricción
+    tablaInicial[i + 1][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
+}
+
 
     // Imprimir la tabla inicial para verificar
     imprimirTabla(tablaInicial);
@@ -242,19 +237,55 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
         }
     }
     
+    
+    //hacer
     public void simplexDosFases(){}
     
-    public void simplexGranM(){
-        float m = 99999;
-        //acomodar z para que cumpla la gran M
-        float [][] matriz = iteraciones.get(0);
-        for (Object indiceArtificiale : indiceArtificiales) {
-            matriz[0][(int)indiceArtificiale] *= m ; 
+    //funcion para hacer basica una columna, usada para hacer basica la artificial
+    //recibe el indice de la columna
+    public float[] obtenerFilaParaHacerBasica(int indiceColumna) {
+        float[][] ultima = iteraciones.get(iteraciones.size() - 1);
+
+        for (float[] fila : ultima) {
+            if (fila[indiceColumna] == 1) {
+                return fila;
+            }
         }
+        return null; // Devuelve null si no se encuentra un 1 en la columna
+    }
+
+        public void hacerBasicaArtificiales(float bigM) {
+            // Función que modifica la primera fila para que las artificiales sean básicas antes de empezar a iterar
+            float[][] iteracion = iteraciones.get(0);
+            for (Object indice : artificiales) {
+                int indiceArtificial = (int) indice;
+                float[] filaArtificial = obtenerFilaParaHacerBasica(indiceArtificial);
+
+                if (filaArtificial != null) {
+                    // Realizar la operación -bigM * filaArtificial + primeraFilaUltima
+                    for (int i = 0; i < filaArtificial.length; i++) {
+                        iteracion[0][i] -= bigM * filaArtificial[i];
+                    }
+                }
+            }
+        }
+
+  
+    
+    //metodo gran M
+    public void simplexGranM(){
         //preparacion de Z
+        float[][] iteracion1 = iteraciones.get(0);
+        float bigM = 1000;
+        int inicioartificial=zeta.length+restricciones.length-1;
+        for(int i=inicioartificial;i<iteracion1[0].length-1;i++){
+                artificiales.add(i);
+                iteracion1[0][i] = bigM;
+        }
+        hacerBasicaArtificiales(bigM);
         int iteracion = 0;
             while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
-
+                
                 // Muestra la tabla después de cada iteración
                 System.out.println("");
                 System.out.println("Tabla después de la iteración " + iteracion + ":");
@@ -303,9 +334,9 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
         int indiceMenorZ = 0;
         
         // Obtiene la fila Z
-        float[] zeta = actual[0];
-        for (int i = 1; i < zeta.length - 1; i++) { // Empezamos desde 1 para ignorar el término constante
-            if (zeta[i] < zeta[indiceMenorZ]) {
+        float[] z = actual[0];
+        for (int i = 1; i < z.length - 1; i++) { // Empezamos desde 1 para ignorar el término constante
+            if (z[i] < z[indiceMenorZ]) {
                 indiceMenorZ = i;   // Actualiza el índice del coeficiente más negativo si se encuentra uno menor
             }
         }
