@@ -20,6 +20,7 @@ public class Simplex {
     //para devolver el Entrante, pa la interfaz
     private String Entrante;
 
+
     public String getSaliente() {
         return Saliente;
     }
@@ -36,8 +37,6 @@ public class Simplex {
         this.Entrante = Entrante;
     }
 
-    
-    
     //las iteraciones
     public ArrayList<float[][]> getIteraciones() {
         return iteraciones;
