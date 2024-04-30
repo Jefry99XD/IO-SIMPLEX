@@ -5,10 +5,8 @@
 package Vista;
 
 import Controller.Simplex;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.util.ArrayList;
-import java.util.Arrays;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.*;
@@ -28,11 +26,11 @@ public class Solucion extends javax.swing.JFrame {
     float[][] MRestricciones;
     public int actual;
     
-    public Solucion(float[] variablesZ, float[][] MRestricciones) {
+    public Solucion(float[] variablesZ, float[][] MRestricciones, String tipo, String metodo, String[] igualdades) {
         this.actual = 1;
         this.variablesZ = variablesZ;
         this.MRestricciones = MRestricciones;
-        Simplex s = new Simplex(variablesZ, MRestricciones);
+        Simplex s = new Simplex(variablesZ, MRestricciones, tipo, metodo, igualdades);
         s.resolver();
         this.iteraciones = s.getIteraciones();
         initComponents();
@@ -212,9 +210,9 @@ public void createTable(int it, float[] variablesZ, float[][] MRestricciones) {
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(46, 46, 46)
+                .addGap(52, 52, 52)
                 .addComponent(matrixpanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)

@@ -12,11 +12,16 @@ import java.util.ArrayList;
  * @author jeffr
  */
 public class ZRestricciones extends javax.swing.JFrame {
+    private final String tipo;
+    private final String metodo;
 
     /**
      * Creates new form Entrada
      */
-    public ZRestricciones(int r,int v) {
+    public ZRestricciones(int r,int v, String tipo, String metodo) {
+        this.igualdades = new ArrayList<>(); 
+        this.metodo = metodo;
+        this.tipo = tipo;
         this.restricciones = r;
         this.variables = v;
         this.resMatrix = new ArrayList<>();
@@ -27,7 +32,7 @@ public class ZRestricciones extends javax.swing.JFrame {
         }
         jPanel5ZETA.setLayout(new FlowLayout());
         jPanel5res.setLayout(new GridLayout(r + 2, 1, 0, 10)); 
-        String[] conditions = new String[]{"≤", "≥", "="};
+        String[] conditions = new String[]{"<=", ">=", "="};
         jPanel5res.add(new JSeparator(SwingConstants.HORIZONTAL));
         for (int i = 0; i < r; i++) {
             JPanel rowPanel = new JPanel(new GridLayout(1, v + 1));
@@ -37,7 +42,9 @@ public class ZRestricciones extends javax.swing.JFrame {
                 rowPanel.add(textField);
                 rowFields.add(textField);
             }
-            rowPanel.add(new JComboBox<>(conditions));
+            JComboBox<String> comboBox = new JComboBox<>(conditions); // Crear el JComboBox
+            rowPanel.add(comboBox); // Agregarlo al JPanel
+            igualdades.add(comboBox); // Agregarlo a la lista
             JTextField resultField = new JTextField(5);
             rowPanel.add(resultField);
             rowFields.add(resultField);
@@ -52,6 +59,8 @@ public class ZRestricciones extends javax.swing.JFrame {
     private int variables;
    
     private ArrayList<ArrayList<JTextField>> resMatrix;
+    
+    private ArrayList<JComboBox> igualdades;
     
     public int getRestricciones() {
         return restricciones;
@@ -88,6 +97,7 @@ public class ZRestricciones extends javax.swing.JFrame {
         jPanel5res = new javax.swing.JPanel();
         jLabel3 = new javax.swing.JLabel();
         jButton4 = new javax.swing.JButton();
+        jButton5 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(0, 204, 204));
@@ -163,6 +173,13 @@ public class ZRestricciones extends javax.swing.JFrame {
             }
         });
 
+        jButton5.setText("Inicio");
+        jButton5.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButton5MouseClicked(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -180,12 +197,18 @@ public class ZRestricciones extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton4)
                 .addGap(23, 23, 23))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(16, 16, 16)
+                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(90, 90, 90)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5ZETA, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5res, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -253,10 +276,26 @@ public static int contarJTextFields(JPanel panel) {
     private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
         float[] z = obtenerValoresJTextFields(jPanel5ZETA);
         float[][] r = obtenerValores();
-        Solucion sol = new Solucion(z, r);
+        
+        Solucion sol = new Solucion(z, r, tipo, metodo, obtenerIgualdades());
         sol.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton4MouseClicked
+
+    private void jButton5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton5MouseClicked
+        Entrada e = new Entrada();
+        this.dispose();
+        e.setVisible(true);
+    }//GEN-LAST:event_jButton5MouseClicked
+
+    public String[] obtenerIgualdades() {
+    String[] ig = new String[restricciones];
+    for(int i=0;i<igualdades.size();i++){
+        ig[i]=(String)igualdades.get(i).getSelectedItem();
+        System.out.println(ig[i]);
+    }
+    return ig;
+}
 
         public float[][] obtenerValores() {
         float[][] matriz = new float[restricciones][variables + 1]; 
@@ -282,6 +321,7 @@ public static int contarJTextFields(JPanel panel) {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

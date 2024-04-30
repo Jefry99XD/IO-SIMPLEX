@@ -6,7 +6,6 @@ package Controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 //este 
 /**
  *
@@ -15,7 +14,18 @@ import java.util.List;
 public class Simplex {
     //guarda las iteraciones
     private ArrayList<float[][]> iteraciones = new ArrayList<>();
+    private float[] zeta;
+    private float[][] restricciones;
+    private ArrayList artificiales = new ArrayList();
+
+    //gran m, normal o 2 fases  
+    private final String metodo;
+    
+    //minimizar o maximizar
+    private final String tipo;
     //para devolver el saliente, pa la interfaz
+    
+    
     private String Saliente;
     //para devolver el Entrante, pa la interfaz
     private String Entrante;
@@ -46,6 +56,7 @@ public class Simplex {
     }
     
     
+    
     //constructor, recibe funcion z, y las restricciones como matriz, se asume que de la interfaz las que no hay son 0
     
     /*Ejemplo de entrada
@@ -73,50 +84,65 @@ public class Simplex {
     //-----------------------------------------
     //Inicializa la tabla inicial
     
-    public Simplex(float[] zeta, float[][] restricciones) {
-        
-        //Convierte los coeficientes de z, en su signo opuesto
+public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo, String[] igualdades) {
+    this.zeta = zeta;
+    this.restricciones=restricciones;
+    this.metodo = metodo;
+    this.tipo = tipo;
+
+    // Convierte los coeficientes de z en su signo opuesto si es maximización
+    if ("Maximizar".equals(this.tipo))
         convertirOpuestosZ(zeta);
 
-        // crea la matriz tablaInicial, que contiene z y las restricciones
-        // junto con las variables de holgura
-        float[][] tablaInicial = new float[restricciones.length + 1][zeta.length + restricciones[0].length];
+    // Tamaño de la tablaInicial
+    int filaTabla = restricciones.length + 1;
 
-        for (int i = 0; i < tablaInicial.length; i++) {
-            tablaInicial[i] = new float[restricciones[0].length + restricciones.length];
+    // Verificar cuántas holguras y artificiales hay que crear.
+    int artificiales = 0;
+    int holguras = 0;
+    for (String igualdad : igualdades) {
+        if ("<=".equals(igualdad))
+            holguras++;
+        else if ("=".equals(igualdad))
+            artificiales++;
+        else if (">=".equals(igualdad)) {
+            artificiales++;
+            holguras++;
         }
-
-        // Copiar zeta y restricciones
-        System.arraycopy(zeta, 0, tablaInicial[0], 0, zeta.length);
-
-        // incorpora las restricciones junto con las variables de holgura necesarias
-        // para convertir las restricciones en ecuaciones
-        for (int i = 0; i < restricciones.length; i++) {
-            //pone las restricciones menos el ultimo, porque el ultimo es el de <=
-            System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
-
-            // para dar el valor de holgura
-            tablaInicial[i + 1][zeta.length + i] = 1;
-
-            // Copiar el último valor de la restricción
-            tablaInicial[i + 1][tablaInicial[i + 1].length - 1] = restricciones[i][restricciones[i].length - 1];
-        }
-
-        // Imprimir la tabla inicial para verificar
-        imprimirTabla(tablaInicial);
-        
-        //guarda la tabla 0 en las iteraciones
-        iteraciones.add(tablaInicial);
     }
-    
+    int columnaTabla = zeta.length + artificiales + holguras + 1;
+
+    // Crear la matriz tablaInicial
+    float[][] tablaInicial = new float[filaTabla][columnaTabla];
+
+    // Copiar zeta y restricciones
+    System.arraycopy(zeta, 0, tablaInicial[0], 0, zeta.length);
+    for (int i = 0; i < restricciones.length; i++) {
+        // Copiar las restricciones menos el último valor, ya que es el término independiente
+        System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
+
+        // Asignar el valor adecuado a las variables de holgura y artificiales
+            if ("<=".equals(igualdades[i])) {
+                tablaInicial[i + 1][zeta.length + i] = 1; // Variable de holgura
+            } else if ("=".equals(igualdades[i])) {
+                tablaInicial[i + 1][zeta.length + holguras-2 + i] = 1; // artificial
+            } else if (">=".equals(igualdades[i])) {
+                tablaInicial[i + 1][zeta.length-1 + i] = -1; // holgura
+                tablaInicial[i + 1][zeta.length + holguras-1 + i] = 1; // artificial
+            }
+        // Copiar el último valor de la restricción
+        tablaInicial[i + 1][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
+    }
+    // Imprimir la tabla inicial para verificar
+    imprimirTabla(tablaInicial);
+    // Guardar la tabla 0 en las iteraciones
+    iteraciones.add(tablaInicial);
+}
+  
     //-----------------------------------------
     //-----------------------------------------
     //   Imprime la tabla
     public void imprimirTabla(float[][] tabla) {
-
-        // Columna original más una para el radio
-        int columnasConRadio = tabla[0].length + 1; 
-
         //Recorre cada fila y columna de la tabla y luego los imprime
         for (int i = 0; i < tabla.length; i++) {
             for (int j = 0; j < tabla[i].length; j++) {
@@ -164,8 +190,30 @@ public class Simplex {
     //Itera sobre las iteraciones  hasta que no haya valores negativos en la fila Z. 
     //En cada iteración, muestra la tabla resultante y actualiza la tabla actual con la función iteracion(). 
     public void resolver() {
+        if ("Gran M".equals(metodo)) {
+            simplexGranM();
+        } else if ("Dos Fases".equals(metodo)) {
+            simplexDosFases();
+        } else {
+            simplexNormal();
+        }
+        if("Minimizar".equals(tipo)){
+            float[][] ultimaMatriz = iteraciones.get(iteraciones.size() - 1);
+            ultimaMatriz[0][ultimaMatriz[0].length-1] *=-1; 
+        }
+        // Mostrar la tabla final
+        System.out.println("");
+        System.out.println("Tabla final:");
+        System.out.println("");
+        imprimirTabla(iteraciones.get(iteraciones.size() - 1));
+    }
+    
+    
+    //funcion que usa el simplex normal
+    public void simplexNormal(){
         int iteracion = 0;
-        while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
+        
+                while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
             
             // Muestra la tabla después de cada iteración
             System.out.println("");
@@ -175,12 +223,66 @@ public class Simplex {
             imprimirTabla(iteraciones.get(iteraciones.size() - 1));
             iteracion++; // Incrementa el número de iteración
         }
+    }
+    
+    
+    //hacer
+    public void simplexDosFases(){}
+    
+    //funcion para hacer basica una columna, usada para hacer basica la artificial
+    //recibe el indice de la columna
+    public float[] obtenerFilaParaHacerBasica(int indiceColumna) {
+        float[][] ultima = iteraciones.get(iteraciones.size() - 1);
 
-        // Mostrar la tabla final
-        System.out.println("");
-        System.out.println("Tabla final:");
-        System.out.println("");
-        imprimirTabla(iteraciones.get(iteraciones.size() - 1));
+        for (float[] fila : ultima) {
+            if (fila[indiceColumna] == 1) {
+                return fila;
+            }
+        }
+        return null; // Devuelve null si no se encuentra un 1 en la columna
+    }
+
+        public void hacerBasicaArtificiales(float bigM) {
+            // Función que modifica la primera fila para que las artificiales sean básicas antes de empezar a iterar
+            float[][] iteracion = iteraciones.get(0);
+            for (Object indice : artificiales) {
+                int indiceArtificial = (int) indice;
+                float[] filaArtificial = obtenerFilaParaHacerBasica(indiceArtificial);
+
+                if (filaArtificial != null) {
+                    // Realizar la operación -bigM * filaArtificial + primeraFilaUltima
+                    for (int i = 0; i < filaArtificial.length; i++) {
+                        iteracion[0][i] -= bigM * filaArtificial[i];
+                    }
+                }
+            }
+        }
+
+  
+    
+    //metodo gran M
+    public void simplexGranM(){
+        //preparacion de Z
+        float[][] iteracion1 = iteraciones.get(0);
+        float bigM = 1000;
+        int inicioartificial=zeta.length+restricciones.length-1;
+        for(int i=inicioartificial;i<iteracion1[0].length-1;i++){
+                artificiales.add(i);
+                iteracion1[0][i] = bigM;
+        }
+        hacerBasicaArtificiales(bigM);
+        int iteracion = 0;
+            while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
+                
+                // Muestra la tabla después de cada iteración
+                System.out.println("");
+                System.out.println("Tabla después de la iteración " + iteracion + ":");
+                System.out.println("");
+                iteracion();
+                imprimirTabla(iteraciones.get(iteraciones.size() - 1));
+                iteracion++; // Incrementa el número de iteración
+        }
+        
     }
         
     //-----------------------------------------
@@ -220,9 +322,9 @@ public class Simplex {
         int indiceMenorZ = 0;
         
         // Obtiene la fila Z
-        float[] zeta = actual[0];
-        for (int i = 1; i < zeta.length - 1; i++) { // Empezamos desde 1 para ignorar el término constante
-            if (zeta[i] < zeta[indiceMenorZ]) {
+        float[] z = actual[0];
+        for (int i = 1; i < z.length - 1; i++) { // Empezamos desde 1 para ignorar el término constante
+            if (z[i] < z[indiceMenorZ]) {
                 indiceMenorZ = i;   // Actualiza el índice del coeficiente más negativo si se encuentra uno menor
             }
         }
@@ -318,9 +420,9 @@ public class Simplex {
         int indiceFilaPivote = -1;
 
         // Encontrar el valor más negativo en Z
-        for (int i = 0; i < actual.length; i++) {
-            if (actual[i][indiceMasNegativo] < menorValorZ) {
-                menorValorZ = actual[i][indiceMasNegativo];
+        for (float[] actual1 : actual) {
+            if (actual1[indiceMasNegativo] < menorValorZ) {
+                menorValorZ = actual1[indiceMasNegativo];
             }
         }
 
@@ -349,9 +451,15 @@ public class Simplex {
         // Devolver el valor del pivote
         return actual[indiceFilaPivote][indiceMasNegativo];
     }
-
-
-    //-----------------------------------------
-    //-----------------------------------------
+    
+    //funcion para devolver los resultados de la ultima iteracion de z y variables.
+    public ArrayList obtenerResultados(){
+        float [][] ultima = iteraciones.get(iteraciones.size()-1);
+        ArrayList resultados = new ArrayList();
+        for (float[] ultima1 : ultima) {
+            resultados.add(ultima1[ultima1.length-1]);
+        }
+        return resultados;
+    }
     
 }
