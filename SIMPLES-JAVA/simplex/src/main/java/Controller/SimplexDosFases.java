@@ -7,12 +7,12 @@ package Controller;
 
 public class SimplexDosFases {
 
-    public void faseUnoSimplex(float[] zeta, float[][] restricciones) {
+    public void faseUnoSimplex(float[] zeta, float[][] restricciones, String[] igualdades) {
         // Cambiar signo de zeta
         float[] zetaOpuesto = cambiarSignoZeta(zeta);
 
         // Paso 1: Crear la tabla inicial con variables de holgura y artificiales
-        float[][] tablaInicial = crearTablaInicial(zetaOpuesto, restricciones);
+        float[][] tablaInicial = crearTablaInicial(zetaOpuesto, restricciones, igualdades);
 
         // Mostrar la tabla inicial
         System.out.println("Tabla inicial:");
@@ -53,48 +53,68 @@ public class SimplexDosFases {
         return zetaOpuesto;
     }
 
-    private float[][] crearTablaInicial(float[] zeta, float[][] restricciones) {
-        // Crear la matriz tablaInicial
-        int numVariables = zeta.length;
-        int numRestricciones = restricciones.length;
-        float[][] tablaInicial = new float[numRestricciones + 2][numVariables + numRestricciones + 2]; // +2 para la fila adicional
+private float[][] crearTablaInicial(float[] zeta, float[][] restricciones, String[] igualdades) {
+    cambiarSignoZeta(zeta);
 
-        // Fila para la variable artificial
-        for (int i = 0; i < numVariables + numRestricciones; i++) {
-            tablaInicial[0][i] = 0;
+    // Tamaño de la tablaInicial
+    int filaTabla = restricciones.length + 2; // Una fila para la fila de ceros, una fila para Zeta
+
+    // Verificar cuántas holguras y artificiales hay que crear.
+    int artificiales = 0;
+    int holguras = 0;
+    for (String igualdad : igualdades) {
+        if ("<=".equals(igualdad))
+            holguras++;
+        else if ("=".equals(igualdad))
+            artificiales++;
+        else if (">=".equals(igualdad)) {
+            artificiales++;
+            holguras++;
         }
-        tablaInicial[0][numVariables + numRestricciones] = 1;  // Coeficiente 1 para la variable artificial
-        tablaInicial[0][numVariables + numRestricciones + 1] = 0;  // RHS inicializado a 0
-
-        // Copiar zeta (ahora con signo opuesto)
-        System.arraycopy(zeta, 0, tablaInicial[1], 0, numVariables);
-
-        // Incorporar las restricciones junto con las variables de holgura y artificiales necesarias
-        for (int i = 0; i < numRestricciones; i++) {
-            // Copiar los coeficientes de las restricciones
-            System.arraycopy(restricciones[i], 0, tablaInicial[i + 2], 0, restricciones[i].length - 1);
-
-            // Añadir variable de holgura
-            if (restricciones[i][numVariables] >= 0) {
-                tablaInicial[i + 2][numVariables + i] = 1;  // Variable de holgura para "≤"
-            } else {
-                tablaInicial[i + 2][numVariables + i] = -1; // Variable de holgura negativa para "≥"
-            }
-
-            // Añadir variable artificial y ajustar RHS según la restricción
-            if (restricciones[i][restricciones[i].length - 1] >= 0) {
-                // Si el término independiente es no negativo, añadir variable artificial para la restricción "≤"
-                tablaInicial[i + 2][numVariables + numRestricciones] = 0;
-                tablaInicial[i + 2][numVariables + numRestricciones + 1] = restricciones[i][restricciones[i].length - 1];
-            } else {
-                // Si el término independiente es negativo, añadir variable artificial para la restricción "≥"
-                tablaInicial[i + 2][numVariables + numRestricciones] = 1;
-                tablaInicial[i + 2][numVariables + numRestricciones + 1] = -restricciones[i][restricciones[i].length - 1];
-            }
-        }
-
-        return tablaInicial;
     }
+    int columnaTabla = zeta.length + artificiales + holguras + 1;
+
+    // Crear la matriz tablaInicial
+    float[][] tablaInicial = new float[filaTabla][columnaTabla];
+
+    // Agregar una fila al principio de la matriz con ceros
+    float[] filaCeros = new float[columnaTabla];
+    tablaInicial[0] = filaCeros;
+
+    // Copiar zeta
+    System.arraycopy(zeta, 0, tablaInicial[1], 0, zeta.length);
+
+    // Copiar restricciones
+    for (int i = 0; i < restricciones.length; i++) {
+        // Copiar las restricciones menos el último valor, ya que es el término independiente
+        System.arraycopy(restricciones[i], 0, tablaInicial[i + 2], 0, restricciones[i].length - 1);
+
+        // Asignar el valor adecuado a las variables de holgura y artificiales
+        if ("<=".equals(igualdades[i])) {
+            tablaInicial[i + 2][zeta.length + holguras - 2 + i] = 1; // Variable de holgura
+        } else if ("=".equals(igualdades[i])) {
+            tablaInicial[i + 2][zeta.length + holguras - 2 + artificiales + i] = 1; // artificial
+            tablaInicial[0][zeta.length + holguras - 2 + artificiales + i] = 1;
+        } else if (">=".equals(igualdades[i])) {
+            tablaInicial[i + 2][zeta.length + holguras - 2 + i] = -1; // holgura
+            tablaInicial[i + 2][zeta.length + holguras - 2 + artificiales + i] = 1; // artificial
+            tablaInicial[0][zeta.length + holguras - 2 + artificiales + i] = 1;
+        }
+
+        // Copiar el último valor de la restricción
+        tablaInicial[i + 2][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
+    }
+
+    // Imprimir la tabla inicial para verificar
+    imprimirTabla(tablaInicial);
+
+    // Guardar la tabla 0 en las iteraciones
+    return tablaInicial;
+}
+
+
+
+
 
     private void imprimirTabla(float[][] tabla) {
         // Imprimir la tabla

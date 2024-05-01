@@ -12,6 +12,7 @@ Vista\Entrada$5.class
 Vista\ZRestricciones.class
 Controller\Simplex.class
 Vista\Solucion$2.class
+Controller\SimplexDosFases.class
 Vista\ZRestricciones$2.class
 Vista\Entrada$1.class
 Vista\Solucion.class
