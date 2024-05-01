@@ -93,8 +93,7 @@ public class SimplexDosFases {
     //-------------------------------------------------
     //-------------------------------------------------
 
-    //HACER LO DE ELIMINAR LA PRIMER FILA Y COLUMNA DE LAS ARTIFICIALES 
-    
+
     //-------------------------------------------------
     //-------------------------------------------------
     //-------------------------------------------------
@@ -415,7 +414,3 @@ private int obtenerIndiceFilaPivote(float[][] tabla, int indiceMasNegativo) {
 }
 
 }
-
-
-
-

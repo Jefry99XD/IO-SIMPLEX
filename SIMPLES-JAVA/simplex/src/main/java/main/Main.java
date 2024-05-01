@@ -7,9 +7,15 @@ import java.util.ArrayList;
 public class Main {
 
     public static void main(String[] args) {
-        float[] z = {2, 4, 4, -3};
-        String[] igualdades = {"=", "="};
-        float[][] restricciones = {{1, 1, 1, 0, 4}, {1, 4, 0, 4, 8}};
+
+       float[] z = {2, 4, 4, -3};
+       String[] igualdades = {"=", "="};
+       float[][] restricciones = {{1, 1, 1, 0, 4}, {1, 4, 0, 4, 8}};
+
+        /*float[] z = {2, -1};
+        String[] igualdades = {"<=", ">="};
+        float[][] restricciones = {{1,1,3}, {-1,1,1}};*/
+
 
         SimplexDosFases simples = new SimplexDosFases();
         simples.faseUnoSimplex(z, restricciones, igualdades);
