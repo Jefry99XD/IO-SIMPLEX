@@ -134,8 +134,13 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     }
     // Imprimir la tabla inicial para verificar
     imprimirTabla(tablaInicial);
-    // Guardar la tabla 0 en las iteraciones
-    iteraciones.add(tablaInicial);
+    float[][] copiaTablaInicial = new float[tablaInicial.length][];
+    for (int i = 0; i < tablaInicial.length; i++) {
+        copiaTablaInicial[i] = tablaInicial[i].clone();
+    }
+
+    // Guardar la copia de la tabla inicial en las iteraciones
+    iteraciones.add(copiaTablaInicial);
 }
   
     //-----------------------------------------
@@ -299,15 +304,22 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     //-----------------------------------------
     //-----------------------------------------
 
-    public void iteracion() {
-        int indiceMenorZ = menorZ();
-        float pivote = getPivote(indiceMenorZ);
-        int indiceSalida = getSalida(indiceMenorZ);
-        actualizarTabla(indiceSalida, indiceMenorZ, pivote);
-        iteraciones.add(iteraciones.get(iteraciones.size() - 1));
+public void iteracion() {
+    int indiceMenorZ = menorZ();
+    float pivote = getPivote(indiceMenorZ);
+    int indiceSalida = getSalida(indiceMenorZ);
+    actualizarTabla(indiceSalida, indiceMenorZ, pivote);
 
-        //iteraciones.add(Arrays.stream(iteraciones.get(iteraciones.size() - 1)).map(float[]::clone).toArray(float[][]::new));
+    // Crear una nueva instancia de la matriz y copiar los valores de la iteración actual
+    float[][] nuevaIteracion = new float[iteraciones.get(iteraciones.size() - 1).length][];
+    for (int i = 0; i < iteraciones.get(iteraciones.size() - 1).length; i++) {
+        nuevaIteracion[i] = iteraciones.get(iteraciones.size() - 1)[i].clone();
     }
+
+    // Agregar la nueva iteración a la lista
+    iteraciones.add(nuevaIteracion);
+}
+
     
     //-----------------------------------------
     //-----------------------------------------

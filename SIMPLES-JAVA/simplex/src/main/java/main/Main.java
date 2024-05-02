@@ -17,12 +17,12 @@ public class Main {
         float[][] restricciones = {{1,1,3}, {-1,1,1}};*/
 
 
-        SimplexDosFases simples = new SimplexDosFases();
-        simples.faseUnoSimplex(z, restricciones, igualdades);
-        //Simplex simplex = new Simplex(z, restricciones, "Minimizar", "Gran M", igualdades);
-        //simplex.resolver();
-        //ArrayList e = simplex.obtenerResultados();
-        //System.out.println(e);
+        //SimplexDosFases simples = new SimplexDosFases();
+        //simples.faseUnoSimplex(z, restricciones, igualdades);
+        Simplex simplex = new Simplex(z, restricciones, "Minimizar", "Gran M", igualdades);
+        simplex.resolver();
+        ArrayList e = simplex.obtenerResultados();
+        System.out.println(e);
     }
 
 }
