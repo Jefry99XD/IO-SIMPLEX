@@ -282,8 +282,12 @@ public static int contarJTextFields(JPanel panel) {
     private void jButton4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton4MouseClicked
         float[] z = obtenerValoresJTextFields(jPanel5ZETA);
         float[][] r = obtenerValores();
-        
-        Solucion sol = new Solucion(z, r, tipo, metodo, obtenerIgualdades());
+        Solucion sol = null;
+        if("Dos Fases".equals(metodo))
+            sol = new Solucion(z, r, tipo, obtenerIgualdades());
+        else{
+            sol =  new Solucion(z, r, tipo, metodo,obtenerIgualdades());
+        }
         sol.setVisible(true);
         this.dispose();
     }//GEN-LAST:event_jButton4MouseClicked
@@ -298,7 +302,6 @@ public static int contarJTextFields(JPanel panel) {
     String[] ig = new String[restricciones];
     for(int i=0;i<igualdades.size();i++){
         ig[i]=(String)igualdades.get(i).getSelectedItem();
-        System.out.println(ig[i]);
     }
     return ig;
 }

@@ -1,0 +1,11 @@
+Investigacion de Operaciones IS 2024
+
+Ariana Alvarado
+
+Jefry Cuendiz
+
+Instrucciones de uso
+
+Hecho en java jdk15
+
+Abrir el proyecto con netbeans y correr el proyecto y probar el programa.

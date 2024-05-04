@@ -5,9 +5,9 @@
 package Vista;
 
 import Controller.Simplex;
+import Controller.SimplexDosFases;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -16,7 +16,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.table.*;
 
 /**
@@ -34,7 +33,22 @@ public class Solucion extends javax.swing.JFrame {
     float[][] MRestricciones;
     public int actual;
     Simplex s;
-    
+    SimplexDosFases ss;
+        public Solucion(float[] variablesZ, float[][] MRestricciones, String tipo, String[] igualdades) {
+        this.actual = 0;
+        this.variablesZ = variablesZ;
+        this.MRestricciones = MRestricciones;
+        this.ss = new SimplexDosFases();
+        ss.faseUnoSimplex(variablesZ, MRestricciones, igualdades, tipo);
+        initComponents();
+        this.iteraciones = ss.getIteraciones();
+        // Configurar el diseño del panel matrixpanel
+        matrixpanel.setLayout(new GridLayout(0, 1));
+
+        // Crear y mostrar la primera tabla
+        tabla(this.actual, variablesZ, MRestricciones);  
+}
+        
     public Solucion(float[] variablesZ, float[][] MRestricciones, String tipo, String metodo, String[] igualdades) {
         this.actual = 0;
         this.variablesZ = variablesZ;
@@ -43,27 +57,12 @@ public class Solucion extends javax.swing.JFrame {
         s.resolver();
         initComponents();
         this.iteraciones = s.getIteraciones();
-        for (int i = 0; i < iteraciones.size(); i++) {
-    float[][] matriz = iteraciones.get(i);
-    System.out.println("Iteración " + (i + 1) + ":");
-    
-    // Iterar sobre cada fila de la matriz
-    for (int j = 0; j < matriz.length; j++) {
-        // Imprimir los elementos de la fila
-        for (int k = 0; k < matriz[j].length; k++) {
-            System.out.print(matriz[j][k] + " ");
-        }
-        System.out.println(); // Nueva línea después de imprimir cada fila
-    }
-    System.out.println(); // Nueva línea después de cada iteración
-}
-
         // Configurar el diseño del panel matrixpanel
         matrixpanel.setLayout(new GridLayout(0, 1));
 
         // Crear y mostrar la primera tabla
         tabla(this.actual, variablesZ, MRestricciones);  
-        initComponents();
+        
 }
     public String[] NombresColumnas(float[] variablesZ, float[][] MRestricciones){
         ArrayList<String> columnasList = new ArrayList<>();
@@ -78,34 +77,47 @@ public class Solucion extends javax.swing.JFrame {
         return columnasList.toArray(columnas);
     }
     public void tabla(int it, float[] variablesZ, float[][] MRestricciones) {
-        // En el constructor de tu clase:
-        matrixpanel.setLayout(new GridLayout(0, 1)); // Una columna, filas automáticas
+    // En el constructor de tu clase:
+    matrixpanel.setLayout(new GridLayout(0, 1)); // Una columna, filas automáticas
 
-        // Luego, en tu método createTable():
-        matrixpanel.removeAll(); // Limpiar el panel antes de agregar la nueva tabla
+    // Luego, en tu método createTable():
+    matrixpanel.removeAll(); // Limpiar el panel antes de agregar la nueva tabla
 
-        // Obtener los datos de la iteración actual
-        float[][] iteracionActual = iteraciones.get(it);
+    // Obtener los datos de la iteración actual
+    float[][] iteracionActual = iteraciones.get(it);
 
-        // Crear un nuevo modelo de tabla
-        DefaultTableModel model = new DefaultTableModel(iteracionActual.length, iteracionActual[0].length);
+    // Crear un nuevo modelo de tabla
+    DefaultTableModel model = new DefaultTableModel(iteracionActual.length, iteracionActual[0].length);
 
-        // Llenar el modelo de tabla con los datos de la iteración actual
-        for (int i = 0; i < iteracionActual.length; i++) {
-            for (int j = 0; j < iteracionActual[i].length; j++) {
-                model.setValueAt(iteracionActual[i][j], i, j);
-            }
+    // Llenar el modelo de tabla con los datos de la iteración actual
+    for (int i = 0; i < iteracionActual.length; i++) {
+        for (int j = 0; j < iteracionActual[i].length; j++) {
+            model.setValueAt(iteracionActual[i][j], i, j);
         }
+    }
 
-        // Crear la tabla con el modelo de datos
-        JTable table = new JTable(model);
-        matrixpanel.add(table);
+    // Crear la tabla con el modelo de datos
+    JTable table = new JTable(model);
 
-        // Refrescar la interfaz
-        matrixpanel.revalidate();
-        matrixpanel.repaint();
+    // Establecer el tamaño de fuente para todo el texto en la tabla
+    Font font = new Font("Arial", Font.PLAIN, 16); // Por ejemplo, tamaño de fuente 16
+    table.setFont(font);
 
+    // Establecer el tamaño de fuente para el texto en el encabezado de la tabla
+    table.getTableHeader().setFont(font);
+
+    // Establecer el alto de las filas de la tabla
+    table.setRowHeight(30); // Por ejemplo, alto de fila 30
+
+    // Agregar la tabla al panel
+    JScrollPane scrollPane = new JScrollPane(table); // Agregar una barra de desplazamiento si la tabla es grande
+    matrixpanel.add(scrollPane);
+
+    // Refrescar la interfaz
+    matrixpanel.revalidate();
+    matrixpanel.repaint();
 }
+
 
     public ArrayList<float[][]> getIteraciones() {
         return iteraciones;
@@ -170,7 +182,7 @@ public class Solucion extends javax.swing.JFrame {
         );
         matrixpanelLayout.setVerticalGroup(
             matrixpanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 185, Short.MAX_VALUE)
+            .addGap(0, 251, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
@@ -205,6 +217,11 @@ public class Solucion extends javax.swing.JFrame {
                 jButton1MouseClicked(evt);
             }
         });
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setBackground(new java.awt.Color(47, 111, 237));
         jButton2.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
@@ -225,6 +242,11 @@ public class Solucion extends javax.swing.JFrame {
                 jButton3MouseClicked(evt);
             }
         });
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout ressssLayout = new javax.swing.GroupLayout(ressss);
         ressss.setLayout(ressssLayout);
@@ -234,7 +256,7 @@ public class Solucion extends javax.swing.JFrame {
         );
         ressssLayout.setVerticalGroup(
             ressssLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 169, Short.MAX_VALUE)
+            .addGap(0, 236, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
@@ -253,16 +275,14 @@ public class Solucion extends javax.swing.JFrame {
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(matrixpanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(ressss, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(191, 191, 191)
+                                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(ressss, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 177, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(96, 96, 96))))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addGap(470, 470, 470)
-                .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 181, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -270,19 +290,18 @@ public class Solucion extends javax.swing.JFrame {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 49, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(matrixpanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, 79, Short.MAX_VALUE)
                     .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(54, 54, 54)
-                .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(72, 72, 72)
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
                 .addComponent(ressss, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(139, 139, 139)
+                .addGap(108, 108, 108)
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -334,9 +353,16 @@ public class Solucion extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton5MouseClicked
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
-       ArrayList<Float> r = new ArrayList<>();
-      for (Object obj : s.obtenerResultados()) {
-          r.add((float)obj);
+       ArrayList r = new ArrayList();
+      if(s == null)
+      {
+          for (Object obj : ss.obtenerResultados()) {
+          r.add(obj);
+        }
+      }else{
+          for (Object obj : s.obtenerResultados()) {
+          r.add(obj);
+          }
       }
 
       // Limpiar el panel antes de agregar nuevos JLabels
@@ -350,7 +376,7 @@ public class Solucion extends javax.swing.JFrame {
       labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.Y_AXIS)); // Establecer un BoxLayout vertical
 
       // Agregar JLabels al panel
-      for (Float resultado : r) {
+      for (Object resultado : r) {
           JLabel label = new JLabel(resultado.toString());
           label.setFont(font);
           label.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -365,6 +391,14 @@ public class Solucion extends javax.swing.JFrame {
       ressss.repaint();
 
     }//GEN-LAST:event_jButton3MouseClicked
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -5,7 +5,6 @@
 package Controller;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 //este 
 /**
  *
@@ -14,9 +13,9 @@ import java.util.Arrays;
 public class Simplex {
     //guarda las iteraciones
     private ArrayList<float[][]> iteraciones = new ArrayList<>();
-    private float[] zeta;
-    private float[][] restricciones;
-    private ArrayList artificiales = new ArrayList();
+    private final float[] zeta;
+    private final float[][] restricciones;
+    private final ArrayList artificiales = new ArrayList();
 
     //gran m, normal o 2 fases  
     private final String metodo;
@@ -53,9 +52,6 @@ public class Simplex {
     public void setIteraciones(ArrayList<float[][]> iteraciones) {
         this.iteraciones = iteraciones;
     }
-    
-    
-    
     //constructor, recibe funcion z, y las restricciones como matriz, se asume que de la interfaz las que no hay son 0
     
     /*Ejemplo de entrada
@@ -97,22 +93,27 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     int filaTabla = restricciones.length + 1;
 
     // Verificar cuántas holguras y artificiales hay que crear.
-    int artificiales = 0;
+    int ars = 0;
     int holguras = 0;
     for (String igualdad : igualdades) {
-        if ("<=".equals(igualdad))
-            holguras++;
-        else if ("=".equals(igualdad))
-            artificiales++;
-        else if (">=".equals(igualdad)) {
-            artificiales++;
-            holguras++;
+        if (null != igualdad)
+            switch (igualdad) {
+            case "<=" -> holguras++;
+            case "=" -> ars++;
+            case ">=" -> {
+                ars++;
+                holguras++;
+            }
+            default -> {
+            }
         }
     }
-    int columnaTabla = zeta.length + artificiales + holguras + 1;
+    int columnaTabla = zeta.length + ars + holguras + 1;
 
     // Crear la matriz tablaInicial
     float[][] tablaInicial = new float[filaTabla][columnaTabla];
+    int numVariablesZeta = zeta.length;
+    int numRestricciones = restricciones.length;
 
     // Copiar zeta y restricciones
     System.arraycopy(zeta, 0, tablaInicial[0], 0, zeta.length);
@@ -120,20 +121,31 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
         // Copiar las restricciones menos el último valor, ya que es el término independiente
         System.arraycopy(restricciones[i], 0, tablaInicial[i + 1], 0, restricciones[i].length - 1);
 
-        // Asignar el valor adecuado a las variables de holgura y artificiales
-            if ("<=".equals(igualdades[i])) {
-                tablaInicial[i + 1][zeta.length + i] = 1; // Variable de holgura
-            } else if ("=".equals(igualdades[i])) {
-                tablaInicial[i + 1][zeta.length + holguras-2 + i] = 1; // artificial
-            } else if (">=".equals(igualdades[i])) {
-                tablaInicial[i + 1][zeta.length-1 + i] = -1; // holgura
-                tablaInicial[i + 1][zeta.length + holguras-1 + i] = 1; // artificial
+            if (null != igualdades[i]) // Asignar el valor adecuado a las variables de holgura y artificiales
+        
+            switch (igualdades[i]) {
+                case "<=":
+                    // Variable de holgura
+                    tablaInicial[i + 1][numVariablesZeta + i] = 1;
+                    break;
+                case "=":
+                    // Variable artificial
+                    tablaInicial[i + 1][numVariablesZeta + numRestricciones + i-3] = 1;
+                    
+                    break;
+                case ">=":
+                    // Holgura
+                    tablaInicial[i + 1][numVariablesZeta + i] = -1;
+                    // Artificial
+                    tablaInicial[i + 1][numVariablesZeta + numRestricciones + i-1] = 1;
+                    break;
             }
+
+
         // Copiar el último valor de la restricción
-        tablaInicial[i + 1][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
+            tablaInicial[i + 1][columnaTabla - 1] = restricciones[i][restricciones[i].length - 1];
     }
     // Imprimir la tabla inicial para verificar
-    imprimirTabla(tablaInicial);
     float[][] copiaTablaInicial = new float[tablaInicial.length][];
     for (int i = 0; i < tablaInicial.length; i++) {
         copiaTablaInicial[i] = tablaInicial[i].clone();
@@ -196,8 +208,6 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     public void resolver() {
         if ("Gran M".equals(metodo)) {
             simplexGranM();
-        } else if ("Dos Fases".equals(metodo)) {
-            simplexDosFases();
         } else {
             simplexNormal();
         }
@@ -205,11 +215,6 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
             float[][] ultimaMatriz = iteraciones.get(iteraciones.size() - 1);
             ultimaMatriz[0][ultimaMatriz[0].length-1] *=-1; 
         }
-        // Mostrar la tabla final
-        System.out.println("");
-        System.out.println("Tabla final:");
-        System.out.println("");
-        imprimirTabla(iteraciones.get(iteraciones.size() - 1));
     }
     
     
@@ -218,20 +223,11 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
         int iteracion = 0;
         
                 while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
-            
             // Muestra la tabla después de cada iteración
-            System.out.println("");
-            System.out.println("Tabla después de la iteración " + iteracion + ":");
-            System.out.println("");
             iteracion();
-            imprimirTabla(iteraciones.get(iteraciones.size() - 1));
             iteracion++; // Incrementa el número de iteración
         }
     }
-    
-    
-    //hacer
-    public void simplexDosFases(){}
     
     //funcion para hacer basica una columna, usada para hacer basica la artificial
     //recibe el indice de la columna
@@ -277,14 +273,8 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
         hacerBasicaArtificiales(bigM);
         int iteracion = 0;
             while (hayValoresNegativosEnZ(iteraciones.get(iteraciones.size() - 1))) {
-                
-                // Muestra la tabla después de cada iteración
-                System.out.println("");
-                System.out.println("Tabla después de la iteración " + iteracion + ":");
-                System.out.println("");
                 iteracion();
-                imprimirTabla(iteraciones.get(iteraciones.size() - 1));
-                iteracion++; // Incrementa el número de iteración
+                iteracion++; 
         }
         
     }
@@ -294,7 +284,7 @@ public Simplex(float[] zeta, float[][] restricciones, String tipo, String metodo
     // Metodo que verifica si hay valores negativos en la fila Z
     public boolean hayValoresNegativosEnZ(float[][] tabla) {
         float[] filaZ = tabla[0];
-        for (int i = 0; i < filaZ.length - 1; i++) { // Excluimos el último elemento que son los radios
+        for (int i = 0; i < filaZ.length - 1; i++) { 
             if (filaZ[i] < 0) {
                 return true;
             }
@@ -309,14 +299,10 @@ public void iteracion() {
     float pivote = getPivote(indiceMenorZ);
     int indiceSalida = getSalida(indiceMenorZ);
     actualizarTabla(indiceSalida, indiceMenorZ, pivote);
-
-    // Crear una nueva instancia de la matriz y copiar los valores de la iteración actual
     float[][] nuevaIteracion = new float[iteraciones.get(iteraciones.size() - 1).length][];
     for (int i = 0; i < iteraciones.get(iteraciones.size() - 1).length; i++) {
         nuevaIteracion[i] = iteraciones.get(iteraciones.size() - 1)[i].clone();
     }
-
-    // Agregar la nueva iteración a la lista
     iteraciones.add(nuevaIteracion);
 }
 
@@ -328,15 +314,11 @@ public void iteracion() {
     public int menorZ() {
         // // Obtiene la última iteración de la tabla
         float[][] actual = iteraciones.get(iteraciones.size() - 1);
-        
-        // Inicializa el índice de la variable con el coeficiente más negativo en 0
         int indiceMenorZ = 0;
-        
-        // Obtiene la fila Z
         float[] z = actual[0];
-        for (int i = 1; i < z.length - 1; i++) { // Empezamos desde 1 para ignorar el término constante
+        for (int i = 1; i < z.length - 1; i++) { 
             if (z[i] < z[indiceMenorZ]) {
-                indiceMenorZ = i;   // Actualiza el índice del coeficiente más negativo si se encuentra uno menor
+                indiceMenorZ = i; 
             }
         }
         return indiceMenorZ;
@@ -345,27 +327,16 @@ public void iteracion() {
     //-----------------------------------------
     //-----------------------------------------
     // Encuentra el índice de la variable de salida en función del radio de la tabla actual.
-    // Retorna el índice de la fila con el radio más pequeño :)
+    // Retorna el índice de la fila con el radio más pequeño
     public int getSalida(int indiceEntrada) {
-    // Obtiene la última iteración de la tabla
     float[][] actual = iteraciones.get(iteraciones.size() - 1);
-    
-    // Inicializa el índice de la variable de salida como 1 (excluyendo la fila Z)
     int indiceSalida = 1;
     
     float menorRadio = Float.MAX_VALUE;
-    
-    // Itera sobre las filas de la tabla (excluyendo la fila Z)
     for (int i = 1; i < actual.length; i++) {
-        // Calcula el radio dividiendo el término independiente entre el coeficiente correspondiente a la variable de entrada
         float radio = actual[i][actual[i].length - 1] / actual[i][indiceEntrada];
-        
-        // Compara si el radio actual es menor que el radio anterior
         if (radio < menorRadio && radio > 0) {
-            // Actualiza el menor radio si se encuentra uno menor
             menorRadio = radio;
-            
-            // Actualiza el índice de la fila con el radio más pequeño
             indiceSalida = i;
         }
     }
@@ -381,15 +352,7 @@ public void iteracion() {
     public void actualizarTabla(int indiceSalida, int indiceEntrada, float pivote) {
         float[][] tabla = iteraciones.get(iteraciones.size() - 1);
         float[] filaSalida = tabla[indiceSalida];
-        // float divisor = filaSalida[indiceEntrada];
         float divisor = getPivote(indiceEntrada);
-        
-        //System.out.println("Pivote: " + divisor);
-        //System.out.println("Índice de salida: " + indiceSalida);
-        //System.out.println("Índice de entrada: " + indiceEntrada);
-
-
-        // Divide toda la fila de salida por el pivote
         for (int i = 0; i < filaSalida.length; i++) {
             filaSalida[i] /= divisor;
             //System.out.println("Nuevo valor en filaSalida[" + i + "]: " + filaSalida[i]);
@@ -451,26 +414,54 @@ public void iteracion() {
 
         // Si no se encontró ningún radio positivo, retornar -1 para indicar que no hay pivote válido
         if (indiceFilaPivote == -1) {
-            System.out.println("No se encontró un pivote válido.");
+            sinLimite = true;
+            //System.out.println("No se encontró un pivote válido.");
             return -1;
         }
 
-        // Imprimir el valor del pivote y el valor más negativo en Z
-        //System.out.println("Valor más negativo en Z: " + menorValorZ);
-        //System.out.println("Pivote: " + actual[indiceFilaPivote][indiceMasNegativo]);
-
-        // Devolver el valor del pivote
         return actual[indiceFilaPivote][indiceMasNegativo];
     }
+    private boolean sinLimite = false;
     
     //funcion para devolver los resultados de la ultima iteracion de z y variables.
-    public ArrayList obtenerResultados(){
-        float [][] ultima = iteraciones.get(iteraciones.size()-1);
-        ArrayList resultados = new ArrayList();
-        for (float[] ultima1 : ultima) {
-            resultados.add(ultima1[ultima1.length-1]);
+     public ArrayList<String> obtenerResultados() {
+        float[][] ultima = iteraciones.get(iteraciones.size() - 1);
+        ArrayList<Integer> indicesBasicas = new ArrayList<>();
+        ArrayList<String> resultados = new ArrayList<>();
+        if(sinLimite){
+            resultados.add("No hay solucion factible");
+            return resultados;
         }
+        resultados.add("Z = " + String.valueOf(ultima[0][ultima[0].length - 1]));
+        
+        for (int i = 0; i < ultima[0].length - 1; i++) { 
+            if (esColumnaBasica(ultima, i)) {
+                indicesBasicas.add(i);
+            }
+        }
+        for (int i = 1; i < ultima.length; i++) {
+            float[] fila = ultima[i];
+                float valor = fila[fila.length - 1];
+                String a = String.valueOf(valor);
+                resultados.add(i + " = " + a); 
+        }
+        
         return resultados;
     }
+
+    //funcion que verifica si es basica la columna
+    public boolean esColumnaBasica(float[][] matriz, int indiceColumna) {
+        int filas = matriz.length;
+        int contador1 = 0;
+        for (int i = 0; i < filas; i++) {
+            if (matriz[i][indiceColumna] == 1) {
+                contador1++;
+            }
+            else if (matriz[i][indiceColumna] != 0) {
+                return false;
+            }
+        }
+        return contador1 == 1;
+}
     
 }
